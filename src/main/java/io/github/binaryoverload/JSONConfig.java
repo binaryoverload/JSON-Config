@@ -14,8 +14,8 @@ import java.util.Objects;
  * accessible by "paths"
  *
  * @author BinaryOverload
- * @version 1.0
- *
+ * @version 1.0.1
+ * @since 1.0
  */
 public class JSONConfig {
 
@@ -64,9 +64,7 @@ public class JSONConfig {
     public JSONConfig(File file, String pathSeparator) throws FileNotFoundException {
         Objects.requireNonNull(file);
         Objects.requireNonNull(pathSeparator);
-        if (pathSeparator.isEmpty() || pathSeparator.length() != 1) {
-            throw new IllegalArgumentException();
-        }
+        GeneralUtils.checkStringLength(pathSeparator, 1);
         this.object = new JSONObject(new JSONTokener(new FileInputStream(file)));
         setPathSeparator(pathSeparator);
     }
@@ -98,9 +96,7 @@ public class JSONConfig {
     public JSONConfig(InputStream stream, String pathSeparator) {
         Objects.requireNonNull(stream);
         Objects.requireNonNull(pathSeparator);
-        if (pathSeparator.isEmpty() || pathSeparator.length() != 1) {
-            throw new IllegalArgumentException();
-        }
+        GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
     }
 
@@ -129,9 +125,7 @@ public class JSONConfig {
     public JSONConfig(JSONObject object, String pathSeparator) {
         Objects.requireNonNull(object);
         this.object = object;
-        if (pathSeparator.isEmpty() || pathSeparator.length() != 1) {
-            throw new IllegalArgumentException();
-        }
+        GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
     }
 
