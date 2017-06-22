@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * @author BinaryOverload
  * @version 1.0
- * @since 1.0.1
+ * @since 1.1
  */
 public class GeneralUtils {
 
