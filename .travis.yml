@@ -1,7 +1,6 @@
 language: java
 jdk:
 - oraclejdk8
-- openjdk8
 before_install:
 - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
 - sudo apt-get update
