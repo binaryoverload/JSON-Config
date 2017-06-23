@@ -5,9 +5,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by william on 23/06/17.
- */
 public class JSONConfigTest {
 
     @Test
@@ -21,6 +18,18 @@ public class JSONConfigTest {
     public void testGet() {
         JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
         assertTrue((config.getElement("glossary.GlossDiv.title").getAsString()).equalsIgnoreCase("S"));
+    }
+
+    @Test
+    public void testGetEmpty() {
+        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
+        assertTrue(config.getElement("").equals(config.getObject()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetMalformedPath() {
+        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
+        config.getElement("glossary.title...");
     }
 
 }
