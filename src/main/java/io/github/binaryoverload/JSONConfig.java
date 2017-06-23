@@ -231,7 +231,9 @@ public class JSONConfig {
      * @param path The path to get the element from. If this is blank,
      *             it sets the root object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
-     * @param object
+     * @param object The object to set at the specified path
+     * @throws IllegalArgumentException if the path is malformed
+     * @throws NullPointerException if the path is null
      */
     public void set(@NotNull String path, @Nullable Object object) {
         JsonObject json = this.object;
