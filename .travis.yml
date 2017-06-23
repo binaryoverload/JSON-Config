@@ -3,6 +3,7 @@ jdk:
 - oraclejdk8
 - openjdk8
 before_install:
+- sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
 - sudo apt-get install jq
 - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest
   | jq -r .assets[0].browser_download_url)
