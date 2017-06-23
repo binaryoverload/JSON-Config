@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  openjava:
+    java:
+        version: openjdk8
+    steps:
+      - checkout
+      - restore_cache:
+          key: json-config-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: json-config-{{ checksum "pom.xml" }}
+
+      - run: mvn package
+
+      - store_test_results:
+          path: target/surefire-reports
+
+      - store_artifacts:
+          path: target/json-config.jar
+  oraclejava:
+      java:
+          version: oraclejdk8
+      steps:
+        - checkout
+        - restore_cache:
+            key: json-config-{{ checksum "pom.xml" }}
+        - run: mvn dependency:go-offline
+        - save_cache:
+            paths:
+              - ~/.m2
+            key: json-config-{{ checksum "pom.xml" }}
+
+        - run: mvn package
+
+        - store_test_results:
+            path: target/surefire-reports
+
+        - store_artifacts:
+            path: target/json-config.jar
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - openjava
+      - oraclejava
