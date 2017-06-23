@@ -200,8 +200,8 @@ public class JSONConfig {
         Objects.requireNonNull(json);
         if (path.isEmpty()) {
             return json;
-        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
-            throw new IllegalArgumentException("Malformed path");
+        } else {
+            GeneralUtils.verifyPath(path, this.pathSeparator);
         }
         String[] subpaths = path.split("\\.");
         for (int i = 0; i < subpaths.length; i++) {
@@ -250,8 +250,8 @@ public class JSONConfig {
         JsonObject root = json;
         if (path.isEmpty()) {
             root = GSON.toJsonTree(object).getAsJsonObject();
-        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
-            throw new IllegalArgumentException("Malformed path");
+        } else {
+            GeneralUtils.verifyPath(path, this.pathSeparator);
         }
         String[] subpaths = path.split("\\.");
         for (int j = 0; j < subpaths.length; j++) {
