@@ -26,4 +26,10 @@ public class JSONConfigTest {
         assertTrue(config.getElement("").equals(config.getObject()));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetMalformedPath() {
+        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
+        config.getElement("glossary.title...");
+    }
+
 }

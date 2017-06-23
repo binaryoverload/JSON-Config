@@ -179,13 +179,15 @@ public class JSONConfig {
 
     public JsonElement getElement(JsonObject json, String path) {
         Objects.requireNonNull(json);
-        if (!path.matches("([A-Za-z]+\\.*)+")) {
+        if (path.isEmpty()) {
             return json;
+        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
+            throw new IllegalArgumentException("Malformed path");
         }
         String[] subpaths = path.split("\\.");
         for (int i = 0; i < subpaths.length; i++) {
             String subpath = subpaths[i];
-            if (json.get(subpath).isJsonNull()) {
+            if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
                 return null;
             } else if (json.get(subpath).isJsonObject()) {
                 if (subpaths.length == 1 && subpaths[0].isEmpty()) {
@@ -208,7 +210,7 @@ public class JSONConfig {
         JsonObject root = json;
         String[] subpaths = path.split("\\.");
         for (int j = 0; j < subpaths.length; j++) {
-            if (root.get(subpaths[j]) == null) {
+            if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
                 root.add(subpaths[j], new JsonObject());
                 if (j == subpaths.length - 1) {
                     root.add(subpaths[j], GSON.toJsonTree(object));
