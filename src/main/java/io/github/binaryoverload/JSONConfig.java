@@ -1,12 +1,11 @@
 package io.github.binaryoverload;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,8 +20,9 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    private JSONObject object;
+    private JsonObject object;
     private String pathSeparator = ".";
+    private static Gson GSON = new Gson();
 
 
     /**
@@ -43,7 +43,7 @@ public class JSONConfig {
      */
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
         Objects.requireNonNull(file);
-        this.object = new JSONObject(new JSONTokener(new FileInputStream(file)));
+        this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
     }
 
     /**
@@ -67,7 +67,7 @@ public class JSONConfig {
         Objects.requireNonNull(file);
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
-        this.object = new JSONObject(new JSONTokener(new FileInputStream(file)));
+        this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         setPathSeparator(pathSeparator);
     }
 
@@ -82,7 +82,7 @@ public class JSONConfig {
      */
     public JSONConfig(InputStream stream) {
         Objects.requireNonNull(stream);
-        this.object = new JSONObject(new JSONTokener(stream));
+        this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
     }
 
     /**
@@ -108,9 +108,9 @@ public class JSONConfig {
      * @param object The object to assign to the config <i>Cannot be null</i>
      * @throws NullPointerException if the object is null
      * @since 1.0
-     * @see JSONObject
+     * @see JsonObject
      */
-    public JSONConfig(JSONObject object) {
+    public JSONConfig(JsonObject object) {
         Objects.requireNonNull(object);
         this.object = object;
     }
@@ -124,7 +124,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @since 1.0
      */
-    public JSONConfig(JSONObject object, String pathSeparator) {
+    public JSONConfig(JsonObject object, String pathSeparator) {
         Objects.requireNonNull(object);
         this.object = object;
         GeneralUtils.checkStringLength(pathSeparator, 1);
@@ -161,7 +161,7 @@ public class JSONConfig {
      * @return The JSON Object associated with this config
      * @since 1.0
      */
-    public JSONObject getObject() {
+    public JsonObject getObject() {
         return object;
     }
 
@@ -172,47 +172,50 @@ public class JSONConfig {
      * @throws NullPointerException if the object is null
      * @since 1.0
      */
-    public void setObject(JSONObject object) {
+    public void setObject(JsonObject object) {
         Objects.requireNonNull(object);
         this.object = object;
     }
 
-    public Object getObject(JSONObject json, String path) {
+    public JsonElement getElement(JsonObject json, String path) {
         String[] subpaths = path.split("\\.");
         for (int i = 0; i < subpaths.length; i++) {
             String subpath = subpaths[i];
-            if (json.get(subpath) == null) {
+            if (json.isJsonNull()) {
                 return null;
-            } else if (json.get(subpath) instanceof JSONObject) {
-                return getObject((JSONObject) json.get(subpath), Arrays.stream(subpaths).skip(i + 1).collect(Collectors.joining(".")));
+            } else if (json.get(subpath).isJsonObject()) {
+                if (subpaths.length == 1 && subpaths[0].isEmpty()) {
+                    return json;
+                }
+                return getElement(json.get(subpath).getAsJsonObject(), Arrays.stream(subpaths).skip(i + 1).collect(Collectors.joining(".")));
             } else {
-                return (String) json.get(subpath);
+                return json.get(subpath);
             }
         }
         return null;
     }
 
-    public Object getObject(String path) {
-        return getObject(this.object, path);
+    public JsonElement getElement(String path) {
+        return getElement(this.object, path);
     }
 
     public void set(String path, Object object) {
-        JSONObject json = this.object;
-        JSONObject root = json;
+        JsonObject json = this.object;
+        JsonObject root = json;
         String[] subpaths = path.split("\\.");
         for (int j = 0; j < subpaths.length; j++) {
             if (root.get(subpaths[j]) == null) {
-                root.put(subpaths[j], new JSONObject());
+                root.add(subpaths[j], new JsonObject());
                 if (j == subpaths.length - 1) {
-                    root.put(subpaths[j], object);
+                    root.add(subpaths[j], GSON.toJsonTree(object));
                 } else {
-                    root = (JSONObject) root.get(subpaths[j]);
+                    root = root.get(subpaths[j]).getAsJsonObject();
                 }
             } else {
                 if (j == subpaths.length - 1) {
-                    root.put(subpaths[j], object);
+                    root.add(subpaths[j], GSON.toJsonTree(object));
                 } else {
-                    root = (JSONObject) root.get(subpaths[j]);
+                    root = root.get(subpaths[j]).getAsJsonObject();
                 }
             }
             if (j == subpaths.length - 1) {
