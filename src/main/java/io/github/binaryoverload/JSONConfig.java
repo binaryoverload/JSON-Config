@@ -9,6 +9,8 @@ import com.google.gson.stream.JsonReader;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 /**
@@ -229,6 +231,7 @@ public class JSONConfig {
      *             then it throws an {@link IllegalArgumentException}
      * @return The element at the specified path <i>Returns null if the element doesn't exist</i>
      * @throws IllegalArgumentException if the path is malformed
+     * @since 2.0
      */
     public JsonElement getElement(String path) {
         return getElement(this.object, path);
@@ -243,6 +246,7 @@ public class JSONConfig {
      * @param object The object to set at the specified path
      * @throws IllegalArgumentException if the path is malformed
      * @throws NullPointerException     if the path is null
+     * @since 2.0
      */
     public void set(String path, Object object) {
 
@@ -275,8 +279,46 @@ public class JSONConfig {
         }
     }
 
-    public String getString(String path) {
-        return "";
+    /**
+     * Gets a string at the specified path
+     *
+     * @param path The path to get the string at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the string value. If the value at the path is not a string
+     * optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see Optional
+     * @since 2.1
+     */
+    public Optional<String> getString(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isString()) {
+            return Optional.of(getElement(path).getAsString());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Gets a integer at the specified path
+     *
+     * @param path The path to get the integer at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the integer value. If the value at the path is not a integer
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see OptionalInt
+     * @since 2.1
+     */
+    public OptionalInt getInteger(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalInt.of(getElement(path).getAsNumber().intValue());
+        } else {
+            return OptionalInt.empty();
+        }
     }
 
 }
