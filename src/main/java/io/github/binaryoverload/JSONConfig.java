@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  * accessible by "paths"
  *
  * @author BinaryOverload
- * @version 1.0.1
  * @since 1.0
  */
 public class JSONConfig {
