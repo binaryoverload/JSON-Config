@@ -7,29 +7,41 @@ import static org.junit.Assert.assertTrue;
 
 public class JSONConfigTest {
 
+    public static JSONConfig config = new JSONConfig(JSONConfig.class.getClassLoader().getResourceAsStream("test.json"));
+
     @Test
     public void testSet() {
-        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
         config.set("glossary.title", "Hi there");
         assertTrue((config.getElement("glossary.title").getAsString()).equalsIgnoreCase("Hi there"));
     }
 
     @Test
     public void testGet() {
-        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
         assertTrue((config.getElement("glossary.GlossDiv.title").getAsString()).equalsIgnoreCase("S"));
     }
 
     @Test
     public void testGetEmpty() {
-        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
         assertTrue(config.getElement("").equals(config.getObject()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetMalformedPath() {
-        JSONConfig config = new JSONConfig(this.getClass().getClassLoader().getResourceAsStream("test.json"));
         config.getElement("glossary.title...");
+    }
+
+    @Test
+    public void testGetString() {
+        assertTrue(config.getString("glossary.title").isPresent());
+        assertTrue(!config.getString("glossary.GlossDiv").isPresent());
+        assertTrue(!config.getString("glossary.GlossDiv.index").isPresent());
+    }
+
+    @Test
+    public void testGetInteger() {
+        assertTrue(config.getInteger("glossary.GlossDiv.index").isPresent());
+        assertTrue(!config.getInteger("glossary.GlossDiv").isPresent());
+        assertTrue(!config.getInteger("glossary.title").isPresent());
     }
 
 }
