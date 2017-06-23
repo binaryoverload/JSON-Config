@@ -43,7 +43,7 @@ public class GeneralUtils {
         if (string.isEmpty() && emptyCheck) {
             throw new IllegalArgumentException();
         }
-        if (!(string.length() == length)) {
+        if (string.length() != length) {
             throw new IllegalArgumentException();
         }
     }
