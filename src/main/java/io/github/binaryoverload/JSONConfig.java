@@ -5,12 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
+import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -288,7 +286,7 @@ public class JSONConfig {
      * optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
-     * @see Optional
+     * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public Optional<String> getString(String path) {
@@ -305,11 +303,11 @@ public class JSONConfig {
      *
      * @param path The path to get the integer at <i>Must not be null, empty or any length other
      *             than 1</i>
-     * @return An optional containing the integer value. If the value at the path is not a integer
+     * @return An optional containing the integer value. If the value at the path is not a number
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
-     * @see OptionalInt
+     * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public OptionalInt getInteger(String path) {
@@ -318,6 +316,69 @@ public class JSONConfig {
             return OptionalInt.of(getElement(path).getAsNumber().intValue());
         } else {
             return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Gets a double at the specified path
+     *
+     * @param path The path to get the double at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the double value. If the value at the path is not a number
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
+    public OptionalDouble getDouble(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalDouble.of(getElement(path).getAsNumber().doubleValue());
+        } else {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * Gets a long at the specified path
+     *
+     * @param path The path to get the long at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the long value. If the value at the path is not a number
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
+    public OptionalLong getLong(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalLong.of(getElement(path).getAsNumber().longValue());
+        } else {
+            return OptionalLong.empty();
+        }
+    }
+
+    /**
+     * Gets a boolean at the specified path
+     *
+     * @param path The path to get the boolean at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the double value. If the value at the path is not a boolean
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
+    public Optional<Boolean> getBoolean(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
+            return Optional.of(getElement(path).getAsBoolean());
+        } else {
+            return Optional.empty();
         }
     }
 
