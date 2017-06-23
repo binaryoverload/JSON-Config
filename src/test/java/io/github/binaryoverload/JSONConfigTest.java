@@ -45,4 +45,26 @@ public class JSONConfigTest {
         assertTrue(!config.getInteger("items").isPresent());
     }
 
+
+    @Test
+    public void testGetDouble() {
+        assertTrue(config.getDouble("items.properties.price.minimum").isPresent());
+        assertTrue(config.getDouble("date").isPresent());
+        assertTrue(!config.getDouble("items.title").isPresent());
+    }
+
+    @Test
+    public void testGetLong() {
+        assertTrue(config.getLong("items.properties.price.minimum").isPresent());
+        assertTrue(config.getLong("date").isPresent());
+        assertTrue(!config.getLong("items.title").isPresent());
+    }
+
+    @Test
+    public void testGetBoolean() {
+        assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").isPresent());
+        assertTrue(!config.getBoolean("date").isPresent());
+        assertTrue(!config.getBoolean("items.title").isPresent());
+    }
+
 }

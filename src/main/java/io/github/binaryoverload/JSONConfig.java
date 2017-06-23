@@ -5,12 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
+import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -318,6 +316,33 @@ public class JSONConfig {
             return OptionalInt.of(getElement(path).getAsNumber().intValue());
         } else {
             return OptionalInt.empty();
+        }
+    }
+
+    public OptionalDouble getDouble(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalDouble.of(getElement(path).getAsNumber().doubleValue());
+        } else {
+            return OptionalDouble.empty();
+        }
+    }
+
+    public OptionalLong getLong(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalLong.of(getElement(path).getAsNumber().longValue());
+        } else {
+            return OptionalLong.empty();
+        }
+    }
+
+    public Optional<Boolean> getBoolean(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
+            return Optional.of(getElement(path).getAsBoolean());
+        } else {
+            return Optional.empty();
         }
     }
 
