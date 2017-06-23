@@ -1,45 +1,48 @@
 version: 2
 jobs:
   openjava:
-    java:
+    working_directory: ~/JSON-Config
+    machine:
+      java:
         version: openjdk8
     steps:
-      - checkout
-      - restore_cache:
-          key: json-config-{{ checksum "pom.xml" }}
-      - run: mvn dependency:go-offline
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: json-config-{{ checksum "pom.xml" }}
+    - checkout
+    - restore_cache:
+        key: json-config-{{ checksum "pom.xml" }}
+    - run: mvn dependency:go-offline
+    - save_cache:
+        paths:
+          - ~/.m2
+        key: json-config-{{ checksum "pom.xml" }}
 
-      - run: mvn package
+    - run: mvn package
 
-      - store_test_results:
-          path: target/surefire-reports
+    - store_test_results:
+        path: target/surefire-reports
 
-      - store_artifacts:
-          path: target/json-config.jar
+    - store_artifacts:
+        path: target/json-config.jar
   oraclejava:
+    working_directory: ~/JSON-Config
+    machine:
       java:
-          version: oraclejdk8
-      steps:
-        - checkout
-        - restore_cache:
-            key: json-config-{{ checksum "pom.xml" }}
-        - run: mvn dependency:go-offline
-        - save_cache:
-            paths:
-              - ~/.m2
-            key: json-config-{{ checksum "pom.xml" }}
+        version: oraclejdk8
+    steps:
+    - checkout
+    - restore_cache:
+        key: json-config-{{ checksum "pom.xml" }}
+    - run: mvn dependency:go-offline
+    - save_cache:
+        paths:
+          - ~/.m2
+        key: json-config-{{ checksum "pom.xml" }}
+    - run: mvn package
 
-        - run: mvn package
+    - store_test_results:
+        path: target/surefire-reports
 
-        - store_test_results:
-            path: target/surefire-reports
-
-        - store_artifacts:
-            path: target/json-config.jar
+    - store_artifacts:
+        path: target/json-config.jar
 
 workflows:
   version: 2
