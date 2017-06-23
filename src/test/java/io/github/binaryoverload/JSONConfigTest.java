@@ -7,17 +7,18 @@ import static org.junit.Assert.assertTrue;
 
 public class JSONConfigTest {
 
-    public static JSONConfig config = new JSONConfig(JSONConfig.class.getClassLoader().getResourceAsStream("test.json"));
+    private static JSONConfig config = new JSONConfig(JSONConfig.class.getClassLoader().getResourceAsStream("test.json"));
 
     @Test
     public void testSet() {
-        config.set("glossary.title", "Hi there");
-        assertTrue((config.getElement("glossary.title").getAsString()).equalsIgnoreCase("Hi there"));
+        config.set("title", "Hi there");
+        assertTrue((config.getElement("title").getAsString()).equalsIgnoreCase("Hi there"));
     }
 
     @Test
     public void testGet() {
-        assertTrue((config.getElement("glossary.GlossDiv.title").getAsString()).equalsIgnoreCase("S"));
+        assertTrue(config.getString("type").isPresent());
+        assertTrue(config.getString("type").get().equalsIgnoreCase("array"));
     }
 
     @Test
@@ -27,21 +28,21 @@ public class JSONConfigTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetMalformedPath() {
-        config.getElement("glossary.title...");
+        config.getElement("title...");
     }
 
     @Test
     public void testGetString() {
-        assertTrue(config.getString("glossary.title").isPresent());
-        assertTrue(!config.getString("glossary.GlossDiv").isPresent());
-        assertTrue(!config.getString("glossary.GlossDiv.index").isPresent());
+        assertTrue(config.getString("items.title").isPresent());
+        assertTrue(!config.getString("items.properties").isPresent());
+        assertTrue(!config.getString("items.required").isPresent());
     }
 
     @Test
     public void testGetInteger() {
-        assertTrue(config.getInteger("glossary.GlossDiv.index").isPresent());
-        assertTrue(!config.getInteger("glossary.GlossDiv").isPresent());
-        assertTrue(!config.getInteger("glossary.title").isPresent());
+        assertTrue(config.getInteger("date").isPresent());
+        assertTrue(!config.getInteger("title").isPresent());
+        assertTrue(!config.getInteger("items").isPresent());
     }
 
 }
