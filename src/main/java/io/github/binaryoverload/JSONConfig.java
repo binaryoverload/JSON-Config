@@ -286,7 +286,7 @@ public class JSONConfig {
      * optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
-     * @see Optional
+     * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public Optional<String> getString(String path) {
@@ -303,11 +303,11 @@ public class JSONConfig {
      *
      * @param path The path to get the integer at <i>Must not be null, empty or any length other
      *             than 1</i>
-     * @return An optional containing the integer value. If the value at the path is not a integer
+     * @return An optional containing the integer value. If the value at the path is not a number
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
-     * @see OptionalInt
+     * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public OptionalInt getInteger(String path) {
@@ -319,6 +319,18 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a double at the specified path
+     *
+     * @param path The path to get the double at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the double value. If the value at the path is not a number
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
     public OptionalDouble getDouble(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
@@ -328,6 +340,18 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a long at the specified path
+     *
+     * @param path The path to get the long at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the long value. If the value at the path is not a number
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
     public OptionalLong getLong(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
@@ -337,6 +361,18 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a boolean at the specified path
+     *
+     * @param path The path to get the boolean at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the double value. If the value at the path is not a boolean
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see JSONConfig#getElement(String)
+     * @since 2.2
+     */
     public Optional<Boolean> getBoolean(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
