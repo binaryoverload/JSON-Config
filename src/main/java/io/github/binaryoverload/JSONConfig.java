@@ -178,10 +178,14 @@ public class JSONConfig {
     }
 
     public JsonElement getElement(JsonObject json, String path) {
+        Objects.requireNonNull(json);
+        if (!path.matches("([A-Za-z]+\\.*)+")) {
+            return json;
+        }
         String[] subpaths = path.split("\\.");
         for (int i = 0; i < subpaths.length; i++) {
             String subpath = subpaths[i];
-            if (json.isJsonNull()) {
+            if (json.get(subpath).isJsonNull()) {
                 return null;
             } else if (json.get(subpath).isJsonObject()) {
                 if (subpaths.length == 1 && subpaths[0].isEmpty()) {
