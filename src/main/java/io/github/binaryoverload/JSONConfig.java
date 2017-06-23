@@ -129,19 +129,49 @@ public class JSONConfig {
         setPathSeparator(pathSeparator);
     }
 
+    /**
+     * Gets the path separator for this config
+     *
+     * @return The path separator
+     * @since 1.0
+     */
     public String getPathSeparator() {
         return pathSeparator;
     }
 
+    /**
+     * Sets the path separator for this config
+     *
+     * @param pathSeparator The path separator to be set <i>Cannot be null, empty or any length other than 1</i>
+     * @throws NullPointerException if the path separator provided is null
+     * @throws IllegalArgumentException if the path separator is empty of any length other than 1
+     * @since 1.0
+     */
     public void setPathSeparator(String pathSeparator) {
+        Objects.requireNonNull(pathSeparator);
+        GeneralUtils.checkStringLength(pathSeparator, 1);
         this.pathSeparator = pathSeparator;
     }
 
+    /**
+     * Gets the JSON object associated with this config
+     *
+     * @return The JSON Object associated with this config
+     * @since 1.0
+     */
     public JSONObject getObject() {
         return object;
     }
 
+    /**
+     * Sets the JSON object for this config
+     *
+     * @param object The object to be set <i>Cannot be null</i>
+     * @throws NullPointerException if the object is null
+     * @since 1.0
+     */
     public void setObject(JSONObject object) {
+        Objects.requireNonNull(object);
         this.object = object;
     }
 }

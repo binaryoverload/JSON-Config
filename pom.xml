@@ -17,7 +17,7 @@
     </dependencies>
 
     <build>
-        <finalName>jsonconfig</finalName>
+        <finalName>json-config</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
@@ -39,6 +39,20 @@
                     <reportOutputDirectory>${project.basedir}/docs</reportOutputDirectory>
                     <destDir>docs</destDir>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
