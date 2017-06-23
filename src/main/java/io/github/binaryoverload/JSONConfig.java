@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Main config class used to represent a json file
@@ -174,4 +176,49 @@ public class JSONConfig {
         Objects.requireNonNull(object);
         this.object = object;
     }
+
+    public Object getObject(JSONObject json, String path) {
+        String[] subpaths = path.split("\\.");
+        for (int i = 0; i < subpaths.length; i++) {
+            String subpath = subpaths[i];
+            if (json.get(subpath) == null) {
+                return null;
+            } else if (json.get(subpath) instanceof JSONObject) {
+                return getObject((JSONObject) json.get(subpath), Arrays.stream(subpaths).skip(i + 1).collect(Collectors.joining(".")));
+            } else {
+                return (String) json.get(subpath);
+            }
+        }
+        return null;
+    }
+
+    public Object getObject(String path) {
+        return getObject(this.object, path);
+    }
+
+    public void set(String path, Object object) {
+        JSONObject json = this.object;
+        JSONObject root = json;
+        String[] subpaths = path.split("\\.");
+        for (int j = 0; j < subpaths.length; j++) {
+            if (root.get(subpaths[j]) == null) {
+                root.put(subpaths[j], new JSONObject());
+                if (j == subpaths.length - 1) {
+                    root.put(subpaths[j], object);
+                } else {
+                    root = (JSONObject) root.get(subpaths[j]);
+                }
+            } else {
+                if (j == subpaths.length - 1) {
+                    root.put(subpaths[j], object);
+                } else {
+                    root = (JSONObject) root.get(subpaths[j]);
+                }
+            }
+            if (j == subpaths.length - 1) {
+                root = json;
+            }
+        }
+    }
+
 }
