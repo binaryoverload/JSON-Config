@@ -228,12 +228,19 @@ public class JSONConfig {
     /**
      * Sets an object at a specified path. Creates sub paths if they don't exist.
      *
-     * @param path
+     * @param path The path to get the element from. If this is blank,
+     *             it sets the root object. If the path is malformed,
+     *             then it throws an {@link IllegalArgumentException}
      * @param object
      */
     public void set(@NotNull String path, @Nullable Object object) {
         JsonObject json = this.object;
         JsonObject root = json;
+        if (path.isEmpty()) {
+            root = GSON.toJsonTree(object).getAsJsonObject();
+        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
+            throw new IllegalArgumentException("Malformed path");
+        }
         String[] subpaths = path.split("\\.");
         for (int j = 0; j < subpaths.length; j++) {
             if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
