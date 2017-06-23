@@ -1,6 +1,8 @@
 package io.github.binaryoverload;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Miscellaneous utilities for the library
@@ -45,6 +47,25 @@ public class GeneralUtils {
         }
         if (string.length() != length) {
             throw new IllegalArgumentException();
+        }
+    }
+
+    /**
+     * Verifies a path with a specific path separator
+     *
+     * @param path The path to verify
+     * @param pathSeparator The path separator to use for verification <i>Cannot be null, empty
+     *                      or any length other than 1</i>
+     * @throws NullPointerException if either of the variables are null
+     * @throws IllegalArgumentException if the path separator is empty or any length other than 1
+     * @throws IllegalArgumentException if the path supplied is malformed
+     */
+    public static void verifyPath(String path, String pathSeparator) {
+        Objects.requireNonNull(path);
+        Objects.requireNonNull(pathSeparator);
+        Matcher matcher = Pattern.compile("([A-z]+(" + pathSeparator + "[A-z]+)*)+").matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Malformed path");
         }
     }
 

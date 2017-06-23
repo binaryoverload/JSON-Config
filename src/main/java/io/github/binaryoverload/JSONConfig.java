@@ -192,7 +192,7 @@ public class JSONConfig {
      *             it returns the entire object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
      * @return The element at the specified path <i>Returns null if the element doesn't exist</i>
-     * @throws NullPointerException if the object specified is null
+     * @throws NullPointerException     if the object specified is null
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
@@ -200,8 +200,8 @@ public class JSONConfig {
         Objects.requireNonNull(json);
         if (path.isEmpty()) {
             return json;
-        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
-            throw new IllegalArgumentException("Malformed path");
+        } else {
+            GeneralUtils.verifyPath(path, this.pathSeparator);
         }
         String[] subpaths = path.split("\\.");
         for (int i = 0; i < subpaths.length; i++) {
@@ -237,12 +237,12 @@ public class JSONConfig {
     /**
      * Sets an object at a specified path. Creates sub paths if they don't exist.
      *
-     * @param path The path to get the element from. If this is blank,
-     *             it sets the root object. If the path is malformed,
-     *             then it throws an {@link IllegalArgumentException}
+     * @param path   The path to get the element from. If this is blank,
+     *               it sets the root object. If the path is malformed,
+     *               then it throws an {@link IllegalArgumentException}
      * @param object The object to set at the specified path
      * @throws IllegalArgumentException if the path is malformed
-     * @throws NullPointerException if the path is null
+     * @throws NullPointerException     if the path is null
      */
     public void set(String path, Object object) {
 
@@ -250,8 +250,8 @@ public class JSONConfig {
         JsonObject root = json;
         if (path.isEmpty()) {
             root = GSON.toJsonTree(object).getAsJsonObject();
-        } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
-            throw new IllegalArgumentException("Malformed path");
+        } else {
+            GeneralUtils.verifyPath(path, this.pathSeparator);
         }
         String[] subpaths = path.split("\\.");
         for (int j = 0; j < subpaths.length; j++) {
@@ -273,6 +273,10 @@ public class JSONConfig {
                 root = json;
             }
         }
+    }
+
+    public String getString(String path) {
+        return "";
     }
 
 }
