@@ -1,5 +1,7 @@
 package io.github.binaryoverload;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.Objects;
 
 /**
@@ -37,10 +39,7 @@ public class GeneralUtils {
      *
      * @since 1.1
      */
-    public static void checkStringLength(String string, int length, boolean emptyCheck) {
-        Objects.requireNonNull(string);
-        Objects.requireNonNull(length);
-        Objects.requireNonNull(emptyCheck);
+    public static void checkStringLength(@NotNull String string, @NotNull int length, @NotNull boolean emptyCheck) {
         if (string.isEmpty() && emptyCheck) {
             throw new IllegalArgumentException();
         }

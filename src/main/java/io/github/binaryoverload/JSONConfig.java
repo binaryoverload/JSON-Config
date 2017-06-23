@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 
 import java.io.*;
 import java.util.Arrays;
@@ -41,8 +43,7 @@ public class JSONConfig {
      * @see File
      * @since 1.0
      */
-    public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
-        Objects.requireNonNull(file);
+    public JSONConfig(@NotNull File file) throws FileNotFoundException, NullPointerException {
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
     }
 
@@ -64,9 +65,7 @@ public class JSONConfig {
      * @see File
      * @since 1.0
      */
-    public JSONConfig(File file, String pathSeparator) throws FileNotFoundException {
-        Objects.requireNonNull(file);
-        Objects.requireNonNull(pathSeparator);
+    public JSONConfig(@NotNull File file, @NotNull String pathSeparator) throws FileNotFoundException {
         GeneralUtils.checkStringLength(pathSeparator, 1);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         setPathSeparator(pathSeparator);
@@ -81,8 +80,7 @@ public class JSONConfig {
      * @see InputStream
      * @since 1.0
      */
-    public JSONConfig(InputStream stream) {
-        Objects.requireNonNull(stream);
+    public JSONConfig(@NotNull InputStream stream) {
         this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)),
                 JsonObject.class);
     }
@@ -98,10 +96,7 @@ public class JSONConfig {
      * @see InputStream
      * @since 1.0
      */
-    public JSONConfig(InputStream stream, String pathSeparator) {
-        Objects.requireNonNull(stream);
-        Objects.requireNonNull(pathSeparator);
-        GeneralUtils.checkStringLength(pathSeparator, 1);
+    public JSONConfig(@NotNull InputStream stream, @NotNull String pathSeparator) {
         setPathSeparator(pathSeparator);
     }
 
@@ -113,8 +108,7 @@ public class JSONConfig {
      * @see JsonObject
      * @since 1.0
      */
-    public JSONConfig(JsonObject object) {
-        Objects.requireNonNull(object);
+    public JSONConfig(@NotNull JsonObject object) {
         this.object = object;
     }
 
@@ -128,8 +122,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @since 1.0
      */
-    public JSONConfig(JsonObject object, String pathSeparator) {
-        Objects.requireNonNull(object);
+    public JSONConfig(@NotNull JsonObject object, @NotNull String pathSeparator) {
         this.object = object;
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
@@ -154,8 +147,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty of any length other than 1
      * @since 1.0
      */
-    public void setPathSeparator(String pathSeparator) {
-        Objects.requireNonNull(pathSeparator);
+    public void setPathSeparator(@NotNull String pathSeparator) {
         GeneralUtils.checkStringLength(pathSeparator, 1);
         this.pathSeparator = pathSeparator;
     }
@@ -177,8 +169,7 @@ public class JSONConfig {
      * @throws NullPointerException if the object is null
      * @since 1.0
      */
-    public void setObject(JsonObject object) {
-        Objects.requireNonNull(object);
+    public void setObject(@NotNull JsonObject object) {
         this.object = object;
     }
 
@@ -193,12 +184,11 @@ public class JSONConfig {
      *             it returns the entire object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
      * @return The element at the specified path <i>Returns null if the element doesn't exist</i>
-     * @throws NullPointerException if the object specified is null
+     * @throws NullPointerException     if the object specified is null
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public JsonElement getElement(JsonObject json, String path) {
-        Objects.requireNonNull(json);
+    public JsonElement getElement(@NotNull JsonObject json, @NotNull String path) {
         if (path.isEmpty()) {
             return json;
         } else if (!path.matches("([A-z]+(\\.[A-z]+)*)+")) {
@@ -241,8 +231,7 @@ public class JSONConfig {
      * @param path
      * @param object
      */
-    public void set(String path, Object object) {
-
+    public void set(@NotNull String path, @Nullable Object object) {
         JsonObject json = this.object;
         JsonObject root = json;
         String[] subpaths = path.split("\\.");
