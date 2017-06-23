@@ -6,7 +6,6 @@ import java.util.Objects;
  * Miscellaneous utilities for the library
  *
  * @author BinaryOverload
- * @version 1.0
  * @since 1.1
  */
 public class GeneralUtils {
@@ -48,5 +47,7 @@ public class GeneralUtils {
             throw new IllegalArgumentException();
         }
     }
+
+
 
 }
