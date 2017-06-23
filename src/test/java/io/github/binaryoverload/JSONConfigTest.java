@@ -34,6 +34,14 @@ public class JSONConfigTest {
     public void testGetString() {
         assertTrue(config.getString("glossary.title").isPresent());
         assertTrue(!config.getString("glossary.GlossDiv").isPresent());
+        assertTrue(!config.getString("glossary.GlossDiv.index").isPresent());
+    }
+
+    @Test
+    public void testGetInteger() {
+        assertTrue(config.getInteger("glossary.GlossDiv.index").isPresent());
+        assertTrue(!config.getInteger("glossary.GlossDiv").isPresent());
+        assertTrue(!config.getInteger("glossary.title").isPresent());
     }
 
 }

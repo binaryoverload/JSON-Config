@@ -10,6 +10,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 /**
@@ -296,6 +297,27 @@ public class JSONConfig {
             return Optional.of(getElement(path).getAsString());
         } else {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Gets a integer at the specified path
+     *
+     * @param path The path to get the integer at <i>Must not be null, empty or any length other
+     *             than 1</i>
+     * @return An optional containing the integer value. If the value at the path is not a integer
+     * then the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @see OptionalInt
+     * @since 2.1
+     */
+    public OptionalInt getInteger(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+            return OptionalInt.of(getElement(path).getAsNumber().intValue());
+        } else {
+            return OptionalInt.empty();
         }
     }
 

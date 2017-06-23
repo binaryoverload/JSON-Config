@@ -3,6 +3,7 @@
     "title":"example glossary",
     "GlossDiv":{
       "title":"S",
+      "index": 1,
       "GlossList":{
         "GlossEntry":{
           "ID":"SGML",
