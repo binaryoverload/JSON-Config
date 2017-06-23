@@ -3,6 +3,7 @@ package io.github.binaryoverload;
 import com.google.gson.JsonObject;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JSONConfigTest {
@@ -34,15 +35,15 @@ public class JSONConfigTest {
     @Test
     public void testGetString() {
         assertTrue(config.getString("items.title").isPresent());
-        assertTrue(!config.getString("items.properties").isPresent());
-        assertTrue(!config.getString("items.required").isPresent());
+        assertFalse(config.getString("items.properties").isPresent());
+        assertFalse(config.getString("items.required").isPresent());
     }
 
     @Test
     public void testGetInteger() {
         assertTrue(config.getInteger("date").isPresent());
-        assertTrue(!config.getInteger("title").isPresent());
-        assertTrue(!config.getInteger("items").isPresent());
+        assertFalse(config.getInteger("title").isPresent());
+        assertFalse(config.getInteger("items").isPresent());
     }
 
 
@@ -50,21 +51,21 @@ public class JSONConfigTest {
     public void testGetDouble() {
         assertTrue(config.getDouble("items.properties.price.minimum").isPresent());
         assertTrue(config.getDouble("date").isPresent());
-        assertTrue(!config.getDouble("items.title").isPresent());
+        assertFalse(config.getDouble("items.title").isPresent());
     }
 
     @Test
     public void testGetLong() {
         assertTrue(config.getLong("items.properties.price.minimum").isPresent());
         assertTrue(config.getLong("date").isPresent());
-        assertTrue(!config.getLong("items.title").isPresent());
+        assertFalse(config.getLong("items.title").isPresent());
     }
 
     @Test
     public void testGetBoolean() {
         assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").isPresent());
-        assertTrue(!config.getBoolean("date").isPresent());
-        assertTrue(!config.getBoolean("items.title").isPresent());
+        assertFalse(config.getBoolean("date").isPresent());
+        assertFalse(config.getBoolean("items.title").isPresent());
     }
 
 }
