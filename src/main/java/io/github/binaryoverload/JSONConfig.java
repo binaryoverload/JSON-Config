@@ -301,19 +301,22 @@ public class JSONConfig {
      * Gets a string at the specified path
      *
      * @param path The path to get the string at <i>Must not be null</i>
-     * @return An optional containing the string value. If the value at the path is not a string
+     * @return An optional containing the string value. If the value at the path does not exist
      * optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not a string
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public synchronized Optional<String> getString(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isString()) {
+        if (getElement(path) == null) {
+            return Optional.empty();
+        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isString()) {
             return Optional.of(getElement(path).getAsString());
         } else {
-            return Optional.empty();
+            throw new IllegalStateException("The element at the path is not a string");
         }
     }
 
@@ -321,19 +324,22 @@ public class JSONConfig {
      * Gets a integer at the specified path
      *
      * @param path The path to get the integer at <i>Must not be null</i>
-     * @return An optional containing the integer value. If the value at the path is not a number
+     * @return An optional containing the integer value. If the value at the path does not exist
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not a number
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
     public synchronized OptionalInt getInteger(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+        if (getElement(path) == null) {
+            return OptionalInt.empty();
+        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalInt.of(getElement(path).getAsNumber().intValue());
         } else {
-            return OptionalInt.empty();
+            throw new IllegalStateException("The element at the path is not a number");
         }
     }
 
@@ -341,19 +347,22 @@ public class JSONConfig {
      * Gets a double at the specified path
      *
      * @param path The path to get the double at <i>Must not</i>
-     * @return An optional containing the double value. If the value at the path is not a number
+     * @return An optional containing the double value. If the value at the path does not exist
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not a number
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
     public synchronized OptionalDouble getDouble(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+        if (getElement(path) == null) {
+            return OptionalDouble.empty();
+        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalDouble.of(getElement(path).getAsNumber().doubleValue());
         } else {
-            return OptionalDouble.empty();
+            throw new IllegalStateException("The element at the path is not a number");
         }
     }
 
@@ -361,19 +370,22 @@ public class JSONConfig {
      * Gets a long at the specified path
      *
      * @param path The path to get the long at <i>Must not be null</i>
-     * @return An optional containing the long value. If the value at the path is not a number
+     * @return An optional containing the long value. If the value at the path does not exist
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not a number
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
     public synchronized OptionalLong getLong(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
+        if (getElement(path) == null) {
+            return OptionalLong.empty();
+        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalLong.of(getElement(path).getAsNumber().longValue());
         } else {
-            return OptionalLong.empty();
+            throw new IllegalStateException("The element at the path is not a number");
         }
     }
 
@@ -381,19 +393,22 @@ public class JSONConfig {
      * Gets a boolean at the specified path
      *
      * @param path The path to get the boolean at <i>Must not be null</i>
-     * @return An optional containing the double value. If the value at the path is not a boolean
+     * @return An optional containing the double value. If the value at the path does not exist
      * then the optional is empty
      * @throws NullPointerException     if the path is null
      * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not a boolean
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
     public synchronized Optional<Boolean> getBoolean(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
+        if (getElement(path) == null) {
+            return Optional.empty();
+        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
             return Optional.of(getElement(path).getAsBoolean());
         } else {
-            return Optional.empty();
+            throw new IllegalStateException("The element at the path is not a boolean");
         }
     }
 
