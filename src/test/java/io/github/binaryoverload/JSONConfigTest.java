@@ -2,6 +2,11 @@ package io.github.binaryoverload;
 
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -128,6 +133,30 @@ public class JSONConfigTest {
     public void testGetArrayNegative() {
         assertFalse(config.getArray("items.properties.blah").isPresent());
         config.getArray("items.properties");
+    }
+
+    @Test
+    public void testGetKeysNotDeep() {
+        Set<String> set = config.getKeys(false);
+        String string = new BufferedReader(new InputStreamReader(this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("key-notdeep.txt")))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        String compare = set.stream().collect(Collectors.joining("\n"));
+        assertTrue(string.equals(compare));
+    }
+
+    @Test
+    public void testGetKeysDeep() {
+        Set<String> set = config.getKeys(true);
+        String string = new BufferedReader(new InputStreamReader(this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("key-deep.txt")))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        String compare = set.stream().collect(Collectors.joining("\n"));
+        assertTrue(string.equals(compare));
     }
 
 }
