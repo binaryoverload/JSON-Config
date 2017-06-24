@@ -1,9 +1,6 @@
 package io.github.binaryoverload;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 
 import java.io.*;
@@ -402,6 +399,17 @@ public class JSONConfig {
             return Optional.of(getElement(path).getAsBoolean());
         } else {
             return Optional.empty();
+        }
+    }
+
+    public synchronized Optional<JsonArray> getArray(String path) {
+        GeneralUtils.verifyPath(path, pathSeparator);
+        if (getElement(path) == null) {
+            return Optional.empty();
+        } else if (getElement(path).isJsonArray()) {
+            return Optional.of(getElement(path).getAsJsonArray());
+        } else {
+            throw new IllegalStateException("The element at the path is not an array");
         }
     }
 
