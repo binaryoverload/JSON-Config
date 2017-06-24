@@ -402,6 +402,18 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a JSON array at the specified path
+     *
+     * @param path The path to get the array at <i>Must not be null</i>
+     * @return An optional containing the array. If the value at the path doesn't exist
+     * than the optional is empty
+     * @throws NullPointerException     if the path is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @throws IllegalStateException    if the element at the path is not an array
+     * @see JSONConfig#getElement(String)
+     * @since 2.5
+     */
     public synchronized Optional<JsonArray> getArray(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path) == null) {
