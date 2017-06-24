@@ -139,7 +139,7 @@ public class JSONConfig {
      * @return The path separator
      * @since 1.0
      */
-    public String getPathSeparator() {
+    public synchronized String getPathSeparator() {
         return pathSeparator;
     }
 
@@ -152,7 +152,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty of any length other than 1
      * @since 1.0
      */
-    public void setPathSeparator(String pathSeparator) {
+    public synchronized void setPathSeparator(String pathSeparator) {
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         this.pathSeparator = pathSeparator;
@@ -164,7 +164,7 @@ public class JSONConfig {
      * @return The JSON Object associated with this config
      * @since 1.0
      */
-    public JsonObject getObject() {
+    public synchronized JsonObject getObject() {
         return object;
     }
 
@@ -175,7 +175,7 @@ public class JSONConfig {
      * @throws NullPointerException if the object is null
      * @since 1.0
      */
-    public void setObject(JsonObject object) {
+    public synchronized void setObject(JsonObject object) {
         Objects.requireNonNull(object);
         this.object = object;
     }
@@ -191,7 +191,7 @@ public class JSONConfig {
      * @throws IllegalStateException if the element at the path is not a JSON object
      * @since 2.3
      */
-    public Optional<JSONConfig> getSubConfig(String path) {
+    public synchronized Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
         GeneralUtils.verifyPath(path, pathSeparator);
         JsonElement element = getElement(path);
@@ -219,7 +219,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public JsonElement getElement(JsonObject json, String path) {
+    public synchronized JsonElement getElement(JsonObject json, String path) {
         Objects.requireNonNull(json);
         if (path.isEmpty()) {
             return json;
@@ -254,7 +254,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public JsonElement getElement(String path) {
+    public synchronized JsonElement getElement(String path) {
         return getElement(this.object, path);
     }
 
@@ -269,7 +269,7 @@ public class JSONConfig {
      * @throws NullPointerException     if the path is null
      * @since 2.0
      */
-    public void set(String path, Object object) {
+    public synchronized void set(String path, Object object) {
 
         JsonObject json = this.object;
         JsonObject root = json;
@@ -312,7 +312,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
-    public Optional<String> getString(String path) {
+    public synchronized Optional<String> getString(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isString()) {
             return Optional.of(getElement(path).getAsString());
@@ -333,7 +333,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
-    public OptionalInt getInteger(String path) {
+    public synchronized OptionalInt getInteger(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalInt.of(getElement(path).getAsNumber().intValue());
@@ -354,7 +354,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public OptionalDouble getDouble(String path) {
+    public synchronized OptionalDouble getDouble(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalDouble.of(getElement(path).getAsNumber().doubleValue());
@@ -375,7 +375,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public OptionalLong getLong(String path) {
+    public synchronized OptionalLong getLong(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
             return OptionalLong.of(getElement(path).getAsNumber().longValue());
@@ -396,7 +396,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public Optional<Boolean> getBoolean(String path) {
+    public synchronized Optional<Boolean> getBoolean(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
         if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
             return Optional.of(getElement(path).getAsBoolean());
