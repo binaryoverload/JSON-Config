@@ -191,13 +191,13 @@ public class JSONConfig {
     public synchronized Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
         GeneralUtils.verifyPath(path, pathSeparator);
-        JsonElement element = getElement(path);
-        if (element == null) {
+        Optional<JsonElement> element = getElement(path);
+        if (!element.isPresent()) {
             return Optional.empty();
-        } else if (!element.isJsonObject()) {
+        } else if (!element.get().isJsonObject()) {
             throw new IllegalStateException("The element at the specified path is not a JSON object");
         } else {
-            return Optional.of(new JSONConfig(element.getAsJsonObject()));
+            return Optional.of(new JSONConfig(element.get().getAsJsonObject()));
         }
     }
 
@@ -211,15 +211,16 @@ public class JSONConfig {
      * @param path The path to get the element from. If this is blank,
      *             it returns the entire object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
-     * @return The element at the specified path <i>Returns null if the element doesn't exist</i>
+     * @return The element at the specified path <i>Returns an empty optional if the element
+     * doesn't exist</i>
      * @throws NullPointerException     if the object specified is null
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized JsonElement getElement(JsonObject json, String path) {
+    public synchronized Optional<JsonElement> getElement(JsonObject json, String path) {
         Objects.requireNonNull(json);
         if (path.isEmpty()) {
-            return json;
+            return Optional.of(json);
         } else {
             GeneralUtils.verifyPath(path, this.pathSeparator);
         }
@@ -227,18 +228,18 @@ public class JSONConfig {
         for (int i = 0; i < subpaths.length; i++) {
             String subpath = subpaths[i];
             if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
-                return null;
+                return Optional.empty();
             } else if (json.get(subpath).isJsonObject()) {
                 if (subpaths.length == 1 && subpaths[0].isEmpty()) {
-                    return json;
+                    return Optional.of(json);
                 }
                 return getElement(json.get(subpath).getAsJsonObject(),
                         Arrays.stream(subpaths).skip(i + 1).collect(Collectors.joining(".")));
             } else {
-                return json.get(subpath);
+                return Optional.of(json.get(subpath));
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -247,11 +248,12 @@ public class JSONConfig {
      * @param path The path to get the element from. If this is blank,
      *             it returns the entire object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
-     * @return The element at the specified path <i>Returns null if the element doesn't exist</i>
+     * @return The element at the specified path <i>Returns an empty optional if the element
+     * doesn't exist</i>
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized JsonElement getElement(String path) {
+    public synchronized Optional<JsonElement> getElement(String path) {
         return getElement(this.object, path);
     }
 
@@ -311,10 +313,10 @@ public class JSONConfig {
      */
     public synchronized Optional<String> getString(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return Optional.empty();
-        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isString()) {
-            return Optional.of(getElement(path).getAsString());
+        } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isString()) {
+            return Optional.of(getElement(path).get().getAsString());
         } else {
             throw new IllegalStateException("The element at the path is not a string");
         }
@@ -334,10 +336,10 @@ public class JSONConfig {
      */
     public synchronized OptionalInt getInteger(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return OptionalInt.empty();
-        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
-            return OptionalInt.of(getElement(path).getAsNumber().intValue());
+        } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
+            return OptionalInt.of(getElement(path).get().getAsNumber().intValue());
         } else {
             throw new IllegalStateException("The element at the path is not a number");
         }
@@ -357,10 +359,10 @@ public class JSONConfig {
      */
     public synchronized OptionalDouble getDouble(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return OptionalDouble.empty();
-        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
-            return OptionalDouble.of(getElement(path).getAsNumber().doubleValue());
+        } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
+            return OptionalDouble.of(getElement(path).get().getAsNumber().doubleValue());
         } else {
             throw new IllegalStateException("The element at the path is not a number");
         }
@@ -380,10 +382,10 @@ public class JSONConfig {
      */
     public synchronized OptionalLong getLong(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return OptionalLong.empty();
-        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isNumber()) {
-            return OptionalLong.of(getElement(path).getAsNumber().longValue());
+        } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
+            return OptionalLong.of(getElement(path).get().getAsNumber().longValue());
         } else {
             throw new IllegalStateException("The element at the path is not a number");
         }
@@ -403,10 +405,10 @@ public class JSONConfig {
      */
     public synchronized Optional<Boolean> getBoolean(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return Optional.empty();
-        } else if (getElement(path).isJsonPrimitive() && getElement(path).getAsJsonPrimitive().isBoolean()) {
-            return Optional.of(getElement(path).getAsBoolean());
+        } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isBoolean()) {
+            return Optional.of(getElement(path).get().getAsBoolean());
         } else {
             throw new IllegalStateException("The element at the path is not a boolean");
         }
@@ -426,10 +428,10 @@ public class JSONConfig {
      */
     public synchronized Optional<JsonArray> getArray(String path) {
         GeneralUtils.verifyPath(path, pathSeparator);
-        if (getElement(path) == null) {
+        if (!getElement(path).isPresent()) {
             return Optional.empty();
-        } else if (getElement(path).isJsonArray()) {
-            return Optional.of(getElement(path).getAsJsonArray());
+        } else if (getElement(path).get().isJsonArray()) {
+            return Optional.of(getElement(path).get().getAsJsonArray());
         } else {
             throw new IllegalStateException("The element at the path is not an array");
         }
