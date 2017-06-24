@@ -22,20 +22,34 @@ public class JSONConfigTest {
     }
 
     @Test
-    public void testSet() {
+    public void testSetPositive() {
         config.set("title", "Hi there");
-        assertTrue((config.getElement("title").getAsString()).equalsIgnoreCase("Hi there"));
+        assertTrue(config.getElement("title").isPresent());
+        assertTrue(config.getElement("title").get().getAsString().equalsIgnoreCase("Hi there"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNegative() {
+        config.set("title...", "Hi");
     }
 
     @Test
-    public void testGet() {
-        assertTrue(config.getString("type").isPresent());
-        assertTrue(config.getString("type").get().equalsIgnoreCase("array"));
+    public void testGetPositive() {
+        assertTrue(config.getElement("type").isPresent());
+        assertTrue(config.getElement("type").get().getAsJsonPrimitive().isString());
+        assertTrue(config.getElement("type").get().getAsString().equalsIgnoreCase("array"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetNegative() {
+        assertFalse(config.getElement("blah").isPresent());
+        config.getElement("blah...");
     }
 
     @Test
     public void testGetEmpty() {
-        assertTrue(config.getElement("").equals(config.getObject()));
+        assertTrue(config.getElement("").isPresent());
+        assertTrue(config.getElement("").get().equals(config.getObject()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -44,39 +58,64 @@ public class JSONConfigTest {
     }
 
     @Test
-    public void testGetString() {
+    public void testGetStringPositive() {
         assertTrue(config.getString("items.title").isPresent());
-        assertFalse(config.getString("items.properties").isPresent());
-        assertFalse(config.getString("items.required").isPresent());
+        assertTrue(config.getString("items.title").get().equals("Product"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetStringNegative() {
+        assertFalse(config.getString("items.blah").isPresent());
+        config.getString("items");
     }
 
     @Test
-    public void testGetInteger() {
+    public void testGetIntegerPositive() {
         assertTrue(config.getInteger("date").isPresent());
-        assertFalse(config.getInteger("title").isPresent());
-        assertFalse(config.getInteger("items").isPresent());
+        assertTrue(config.getInteger("date").getAsInt() == 10247893);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetIntegerNegative() {
+        assertFalse(config.getInteger("blah").isPresent());
+        config.getInteger("title");
     }
 
 
     @Test
-    public void testGetDouble() {
-        assertTrue(config.getDouble("items.properties.price.minimum").isPresent());
+    public void testGetDoublePositive() {
         assertTrue(config.getDouble("date").isPresent());
-        assertFalse(config.getDouble("items.title").isPresent());
+        assertTrue(config.getDouble("date").getAsDouble() == 10247893D);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetDoubleNegative() {
+        assertFalse(config.getDouble("blah").isPresent());
+        config.getDouble("title");
     }
 
     @Test
-    public void testGetLong() {
-        assertTrue(config.getLong("items.properties.price.minimum").isPresent());
+    public void testGetLongPositive() {
         assertTrue(config.getLong("date").isPresent());
-        assertFalse(config.getLong("items.title").isPresent());
+        assertTrue(config.getLong("date").getAsLong() == 10247893L);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetLongNegative() {
+        assertFalse(config.getLong("blah").isPresent());
+        config.getLong("title");
     }
 
     @Test
-    public void testGetBoolean() {
+    public void testGetBooleanPositive() {
         assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").isPresent());
-        assertFalse(config.getBoolean("date").isPresent());
-        assertFalse(config.getBoolean("items.title").isPresent());
+        assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").get());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetBooleanNegative() {
+        assertFalse(config.getBoolean("blah").isPresent());
+        config.getBoolean("date");
     }
 
     @Test
