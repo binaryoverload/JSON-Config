@@ -189,6 +189,7 @@ public class JSONConfig {
      * at the path is non-existent
      * @throws NullPointerException  if the path is null
      * @throws IllegalStateException if the element at the path is not a JSON object
+     * @since 2.3
      */
     public Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);

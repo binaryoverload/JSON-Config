@@ -59,6 +59,7 @@ public class GeneralUtils {
      * @throws NullPointerException if either of the variables are null
      * @throws IllegalArgumentException if the path separator is empty or any length other than 1
      * @throws IllegalArgumentException if the path supplied is malformed
+     * @since 2.1
      */
     public static void verifyPath(String path, String pathSeparator) {
         Objects.requireNonNull(path);
