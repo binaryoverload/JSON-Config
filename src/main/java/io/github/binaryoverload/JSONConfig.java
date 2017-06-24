@@ -437,4 +437,63 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a list of keys in this config
+     * If {@code deep} is true then it will descend into all subpaths
+     * using the path to the keys as the key itself
+     *
+     * @param deep Whether to transverse the entire config tree or not
+     * @return A {@link LinkedHashSet} containing all the keys. If the config is empty
+     * then so will this list be
+     */
+    public synchronized Set<String> getKeys(boolean deep) {
+        Set<String> set = new LinkedHashSet<>();
+        mapChildrenKeys(set, this.object, deep);
+        return set;
+    }
+
+    protected synchronized void mapChildrenKeys(Set<String> output, JsonObject object, boolean deep) {
+        for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
+            output.add(entry.getKey());
+            if (entry.getValue().isJsonObject() && deep) {
+                mapChildrenKeys(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+            }
+        }
+    }
+
+    protected synchronized void mapChildrenKeys(String prefix, Set<String> output,
+                                                JsonObject jsonObject, boolean deep) {
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+            output.add(prefix + pathSeparator + entry.getKey());
+            if (entry.getValue().isJsonObject() && deep) {
+                mapChildrenKeys(prefix + pathSeparator + entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+            }
+        }
+    }
+
+    public synchronized Map<String, Object> getValues(boolean deep) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        mapChildrenValues(map, this.object, deep);
+        return map;
+    }
+
+    protected synchronized void mapChildrenValues(Map<String, Object> output, JsonObject object, boolean deep) {
+        for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
+            output.put(entry.getKey(), entry.getValue());
+            if (entry.getValue().isJsonObject() && deep) {
+                mapChildrenValues(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+            }
+        }
+    }
+
+    protected synchronized void mapChildrenValues(String prefix, Map<String, Object> output,
+                                                  JsonObject jsonObject, boolean deep) {
+        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+            output.put(prefix + pathSeparator + entry.getKey(), entry.getValue());
+            if (entry.getValue().isJsonObject() && deep) {
+                mapChildrenValues(prefix + pathSeparator + entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+            }
+        }
+    }
+
 }
