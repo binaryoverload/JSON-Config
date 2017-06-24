@@ -10,6 +10,18 @@ public class JSONConfigTest {
     private static JSONConfig config = new JSONConfig(JSONConfig.class.getClassLoader().getResourceAsStream("test.json"));
 
     @Test
+    public void testSubConfigPositive() {
+        assertTrue(config.getSubConfig("items").isPresent());
+        assertTrue(config.getSubConfig("items").get().getString("title").get().equals("Product"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testSubConfigNegative() {
+        assertFalse(config.getSubConfig("blad.djh.dsjh").isPresent());
+        config.getSubConfig("title");
+    }
+
+    @Test
     public void testSet() {
         config.set("title", "Hi there");
         assertTrue((config.getElement("title").getAsString()).equalsIgnoreCase("Hi there"));
