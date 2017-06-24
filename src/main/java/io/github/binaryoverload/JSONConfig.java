@@ -300,8 +300,7 @@ public class JSONConfig {
     /**
      * Gets a string at the specified path
      *
-     * @param path The path to get the string at <i>Must not be null, empty or any length other
-     *             than 1</i>
+     * @param path The path to get the string at <i>Must not be null</i>
      * @return An optional containing the string value. If the value at the path is not a string
      * optional is empty
      * @throws NullPointerException     if the path is null
@@ -321,8 +320,7 @@ public class JSONConfig {
     /**
      * Gets a integer at the specified path
      *
-     * @param path The path to get the integer at <i>Must not be null, empty or any length other
-     *             than 1</i>
+     * @param path The path to get the integer at <i>Must not be null</i>
      * @return An optional containing the integer value. If the value at the path is not a number
      * then the optional is empty
      * @throws NullPointerException     if the path is null
@@ -342,8 +340,7 @@ public class JSONConfig {
     /**
      * Gets a double at the specified path
      *
-     * @param path The path to get the double at <i>Must not be null, empty or any length other
-     *             than 1</i>
+     * @param path The path to get the double at <i>Must not</i>
      * @return An optional containing the double value. If the value at the path is not a number
      * then the optional is empty
      * @throws NullPointerException     if the path is null
@@ -363,8 +360,7 @@ public class JSONConfig {
     /**
      * Gets a long at the specified path
      *
-     * @param path The path to get the long at <i>Must not be null, empty or any length other
-     *             than 1</i>
+     * @param path The path to get the long at <i>Must not be null</i>
      * @return An optional containing the long value. If the value at the path is not a number
      * then the optional is empty
      * @throws NullPointerException     if the path is null
@@ -384,8 +380,7 @@ public class JSONConfig {
     /**
      * Gets a boolean at the specified path
      *
-     * @param path The path to get the boolean at <i>Must not be null, empty or any length other
-     *             than 1</i>
+     * @param path The path to get the boolean at <i>Must not be null</i>
      * @return An optional containing the double value. If the value at the path is not a boolean
      * then the optional is empty
      * @throws NullPointerException     if the path is null
