@@ -79,4 +79,16 @@ public class JSONConfigTest {
         assertFalse(config.getBoolean("items.title").isPresent());
     }
 
+    @Test
+    public void testGetArrayPositive() {
+        assertTrue(config.getArray("items.required").isPresent());
+        assertTrue(config.getArray("items.required").get().get(0).getAsString().equalsIgnoreCase("id"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGetArrayNegative() {
+        assertFalse(config.getArray("items.properties.blah").isPresent());
+        config.getArray("items.properties");
+    }
+
 }
