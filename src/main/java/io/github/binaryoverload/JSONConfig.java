@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 
 import java.io.*;
 import java.util.*;

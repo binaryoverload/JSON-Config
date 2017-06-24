@@ -1,6 +1,5 @@
 package io.github.binaryoverload;
 
-import com.google.gson.JsonObject;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
