@@ -181,6 +181,29 @@ public class JSONConfig {
     }
 
     /**
+     * Returns a new config with its root object set to the object
+     * retrieved from the specified path
+     *
+     * @param path The path to get the new config from <i>Cannot be null</i>
+     * @return The JSONConfig wrapped in an {@link Optional}. The optional is empty if the element
+     * at the path is non-existent
+     * @throws NullPointerException  if the path is null
+     * @throws IllegalStateException if the element at the path is not a JSON object
+     */
+    public Optional<JSONConfig> getSubConfig(String path) {
+        Objects.requireNonNull(path);
+        GeneralUtils.verifyPath(path, pathSeparator);
+        JsonElement element = getElement(path);
+        if (element == null) {
+            return Optional.empty();
+        } else if (!element.isJsonObject()) {
+            throw new IllegalStateException("The element at the specified path is not a JSON object");
+        } else {
+            return Optional.of(new JSONConfig(element.getAsJsonObject()));
+        }
+    }
+
+    /**
      * Method to get a JSON Element from a specified path
      * <p>
      * <strong>It is not recommended to use this method! Use
