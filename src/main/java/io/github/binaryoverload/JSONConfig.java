@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 
 import java.io.*;
 import java.util.*;
@@ -179,6 +178,29 @@ public class JSONConfig {
     public void setObject(JsonObject object) {
         Objects.requireNonNull(object);
         this.object = object;
+    }
+
+    /**
+     * Returns a new config with its root object set to the object
+     * retrieved from the specified path
+     *
+     * @param path The path to get the new config from <i>Cannot be null</i>
+     * @return The JSONConfig wrapped in an {@link Optional}. The optional is empty if the element
+     * at the path is non-existent
+     * @throws NullPointerException  if the path is null
+     * @throws IllegalStateException if the element at the path is not a JSON object
+     */
+    public Optional<JSONConfig> getSubConfig(String path) {
+        Objects.requireNonNull(path);
+        GeneralUtils.verifyPath(path, pathSeparator);
+        JsonElement element = getElement(path);
+        if (element == null) {
+            return Optional.empty();
+        } else if (!element.isJsonObject()) {
+            throw new IllegalStateException("The element at the specified path is not a JSON object");
+        } else {
+            return Optional.of(new JSONConfig(element.getAsJsonObject()));
+        }
     }
 
     /**
