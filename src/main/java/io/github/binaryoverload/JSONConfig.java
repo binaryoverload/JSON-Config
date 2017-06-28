@@ -471,6 +471,15 @@ public class JSONConfig {
         }
     }
 
+    /**
+     * Gets a map of keys and values in this config
+     * If {@code deep} is true then it will descend into all subpaths
+     * using the path to the keys as the key itself
+     *
+     * @param deep Whether to transverse the entire config tree or not
+     * @return A {@link LinkedHashMap} containing all the keys and values. If the config is empty
+     * then so will this list be
+     */
     public synchronized Map<String, Object> getValues(boolean deep) {
         Map<String, Object> map = new LinkedHashMap<>();
         mapChildrenValues(map, this.object, deep);
