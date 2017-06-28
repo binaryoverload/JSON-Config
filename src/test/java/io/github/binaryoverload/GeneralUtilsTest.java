@@ -4,8 +4,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
-
 
 public class GeneralUtilsTest {
 
@@ -32,6 +30,7 @@ public class GeneralUtilsTest {
     @Test
     public void verifyPathPositive() {
         GeneralUtils.verifyPath("cat.cat.cat", ".");
+        GeneralUtils.verifyPath("ca-t.cat.cat", ".");
         GeneralUtils.verifyPath("cat-cat-cat", "-");
     }
 
