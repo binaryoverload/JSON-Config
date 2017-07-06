@@ -32,13 +32,36 @@ public class JSONConfig {
      *                               or for some other reason cannot be opened for
      *                               reading.
      * @throws NullPointerException  if the passed variable is null
-     * @see FileInputStream
+     * @see FileReader
      * @see File
      * @since 1.0
      */
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
         Objects.requireNonNull(file);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+    }
+
+    /**
+     * Recommended constructor for most file based applications
+     * <br>
+     * <i>Uses the default path separator</i>
+     *
+     * @param fileName The file to get the config from
+     * @throws FileNotFoundException if the file does not exist,
+     *                               is a directory rather than a regular file,
+     *                               or for some other reason cannot be opened for
+     *                               reading.
+     * @throws NullPointerException  if the passed variable is null
+     * @throws IllegalArgumentException if the file name is empty
+     * @see FileReader
+     * @since 1.0
+     */
+    public JSONConfig(String fileName) throws FileNotFoundException, NullPointerException {
+        Objects.requireNonNull(fileName);
+        if (fileName.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
     }
 
     /**
