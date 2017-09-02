@@ -6,7 +6,7 @@
 
     <groupId>io.github.binaryoverload</groupId>
     <artifactId>jsonconfig</artifactId>
-    <version>2.7</version>
+    <version>2.7.2</version>
 
     <dependencies>
         <dependency>
@@ -77,7 +77,7 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                    </execution>
+                     </execution>
                 </executions>
             </plugin>
         </plugins>

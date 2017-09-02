@@ -31,6 +31,7 @@ public class GeneralUtilsTest {
     public void verifyPathPositive() {
         GeneralUtils.verifyPath("cat.cat.cat", ".");
         GeneralUtils.verifyPath("ca-t.cat.cat", ".");
+        GeneralUtils.verifyPath("cat_cat.cat", ".");
         GeneralUtils.verifyPath("cat-cat-cat", "-");
     }
 
