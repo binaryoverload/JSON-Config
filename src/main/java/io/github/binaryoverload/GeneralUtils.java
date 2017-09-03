@@ -64,7 +64,7 @@ public class GeneralUtils {
     public static void verifyPath(String path, String pathSeparator) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(pathSeparator);
-        Matcher matcher = Pattern.compile("([A-z0-9-?!£$%^&*()_]+(" + pathSeparator + "[A-z0-9-?!£$%^&*()_]+)*)+").matcher(path);
+        Matcher matcher = Pattern.compile("([A-z0-9-?!£$%^&*()_]\\+(" + pathSeparator + "[A-z0-9-?!£$%^&*()_]\\+)*)+").matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Malformed path");
         }
