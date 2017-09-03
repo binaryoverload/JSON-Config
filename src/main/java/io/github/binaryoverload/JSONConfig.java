@@ -234,13 +234,14 @@ public class JSONConfig {
      * @param path The path to get the element from. If this is blank,
      *             it returns the entire object. If the path is malformed,
      *             then it throws an {@link IllegalArgumentException}
+     * @param allowNull Whether to allow null
      * @return The element at the specified path <i>Returns an empty optional if the element
      * doesn't exist</i>
      * @throws NullPointerException     if the object specified is null
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized Optional<JsonElement> getElement(JsonObject json, String path) {
+    public synchronized Optional<JsonElement> getElement(JsonObject json, String path, boolean allowNull) {
         Objects.requireNonNull(json);
         if (path.isEmpty()) {
             return Optional.of(json);
@@ -251,6 +252,9 @@ public class JSONConfig {
         for (int i = 0; i < subpaths.length; i++) {
             String subpath = subpaths[i];
             if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
+                if (allowNull) {
+                    return Optional.of(JsonNull.INSTANCE);
+                }
                 return Optional.empty();
             } else if (json.get(subpath).isJsonObject()) {
                 if (subpaths.length == 1 && subpaths[0].isEmpty()) {
@@ -263,6 +267,26 @@ public class JSONConfig {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Method to get a JSON Element from a specified path
+     * <p>
+     * <strong>It is not recommended to use this method! Use
+     * {@link io.github.binaryoverload.JSONConfig#getElement(String)} instead!</strong>
+     *
+     * @param json The object to search in
+     * @param path The path to get the element from. If this is blank,
+     *             it returns the entire object. If the path is malformed,
+     *             then it throws an {@link IllegalArgumentException}
+     * @return The element at the specified path <i>Returns an empty optional if the element
+     * doesn't exist</i>
+     * @throws NullPointerException     if the object specified is null
+     * @throws IllegalArgumentException if the path is malformed
+     * @since 2.0
+     */
+    public synchronized Optional<JsonElement> getElement(JsonObject json, String path) {
+        return getElement(json, path, false);
     }
 
     /**
