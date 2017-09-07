@@ -2,6 +2,7 @@ package io.github.binaryoverload;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import org.apache.commons.io.IOUtil;
 
 import java.io.*;
 import java.util.*;
@@ -39,6 +40,7 @@ public class JSONConfig {
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
         Objects.requireNonNull(file);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+        Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
     /**
@@ -47,11 +49,11 @@ public class JSONConfig {
      * <i>Uses the default path separator</i>
      *
      * @param fileName The file to get the config from
-     * @throws FileNotFoundException if the file does not exist,
-     *                               is a directory rather than a regular file,
-     *                               or for some other reason cannot be opened for
-     *                               reading.
-     * @throws NullPointerException  if the passed variable is null
+     * @throws FileNotFoundException    if the file does not exist,
+     *                                  is a directory rather than a regular file,
+     *                                  or for some other reason cannot be opened for
+     *                                  reading.
+     * @throws NullPointerException     if the passed variable is null
      * @throws IllegalArgumentException if the file name is empty
      * @see FileReader
      * @since 1.0
@@ -62,6 +64,7 @@ public class JSONConfig {
             throw new IllegalArgumentException();
         }
         this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
+        Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
     /**
@@ -87,6 +90,7 @@ public class JSONConfig {
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+        Objects.requireNonNull(this.getObject(), "Input is empty!");
         setPathSeparator(pathSeparator);
     }
 
@@ -103,6 +107,7 @@ public class JSONConfig {
         Objects.requireNonNull(stream);
         this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)),
                 JsonObject.class);
+        Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
     /**
@@ -113,14 +118,18 @@ public class JSONConfig {
      *                      null, empty or any other lenth than 1</i>
      * @throws NullPointerException     if any of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
+     * @throws IOException              if the stream is invalid or malformatted 
      * @see InputStream
-     * @since 1.0
+     * @see org.apache.commons.io.IOUtil
+     * * @since 1.0
      */
-    public JSONConfig(InputStream stream, String pathSeparator) {
+    public JSONConfig(InputStream stream, String pathSeparator) throws IOException {
         Objects.requireNonNull(stream);
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
+        this.object = GSON.fromJson(IOUtil.toString(stream), JsonObject.class);
+        Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
     /**
@@ -132,7 +141,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(JsonObject object) {
-        Objects.requireNonNull(object);
+        Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
     }
 
@@ -147,7 +156,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(JsonObject object, String pathSeparator) {
-        Objects.requireNonNull(object);
+        Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
@@ -230,10 +239,10 @@ public class JSONConfig {
      * <strong>It is not recommended to use this method! Use
      * {@link io.github.binaryoverload.JSONConfig#getElement(String)} instead!</strong>
      *
-     * @param json The object to search in
-     * @param path The path to get the element from. If this is blank,
-     *             it returns the entire object. If the path is malformed,
-     *             then it throws an {@link IllegalArgumentException}
+     * @param json      The object to search in
+     * @param path      The path to get the element from. If this is blank,
+     *                  it returns the entire object. If the path is malformed,
+     *                  then it throws an {@link IllegalArgumentException}
      * @param allowNull Whether to allow null
      * @return The element at the specified path <i>Returns an empty optional if the element
      * doesn't exist</i>
