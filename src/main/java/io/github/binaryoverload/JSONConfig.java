@@ -127,7 +127,7 @@ public class JSONConfig {
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-        this.object = GSON.fromJson(br.lines().collect(Collectors.joining("\n")), JsonObject.class);
+        this.object = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject.class);
         br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
