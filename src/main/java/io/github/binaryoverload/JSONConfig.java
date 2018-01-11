@@ -2,7 +2,6 @@ package io.github.binaryoverload;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
-import org.apache.commons.io.IOUtil;
 
 import java.io.*;
 import java.util.*;
@@ -118,9 +117,8 @@ public class JSONConfig {
      *                      null, empty or any other lenth than 1</i>
      * @throws NullPointerException     if any of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
-     * @throws IOException              if the stream is invalid or malformatted 
+     * @throws IOException              if the stream is invalid or malformatted
      * @see InputStream
-     * @see org.apache.commons.io.IOUtil
      * * @since 1.0
      */
     public JSONConfig(InputStream stream, String pathSeparator) throws IOException {
@@ -128,7 +126,9 @@ public class JSONConfig {
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
-        this.object = GSON.fromJson(IOUtil.toString(stream), JsonObject.class);
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        this.object = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject.class);
+        br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
