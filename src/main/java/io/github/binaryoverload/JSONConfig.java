@@ -1,9 +1,11 @@
 package io.github.binaryoverload;
 
 import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Main config class used to represent a json file
@@ -126,6 +128,7 @@ public class JSONConfig {
         setPathSeparator(pathSeparator);
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         this.object = GSON.fromJson(br.lines().collect(Collectors.joining("\n")), JsonObject.class);
+        br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
