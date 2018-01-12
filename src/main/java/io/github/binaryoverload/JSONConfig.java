@@ -24,10 +24,22 @@
 
 package io.github.binaryoverload;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -380,6 +392,30 @@ public class JSONConfig {
     }
 
     /**
+     * Removes an element from the path
+     *
+     * @param path The path to remove
+     * @throws IllegalStateException if the element at the path is not present
+     * @throws IllegalStateException if the parent of the specified path is not an object
+     */
+    public void remove(String path) {
+        String[] paths = path.split("\\.");
+        if (!getElement(path).isPresent()) {
+            throw new IllegalStateException("Element not present!");
+        }
+        if (paths.length == 1) {
+            getObject().remove(path);
+        } else {
+            Optional<JSONConfig> subConfig = getSubConfig(path.substring(0, path.lastIndexOf(".")));
+            if (subConfig.isPresent()) {
+                subConfig.get().remove(path.substring(path.lastIndexOf(".") + 1, path.length()));
+            } else {
+                throw new IllegalStateException("Parent of path specified is not an object!");
+            }
+        }
+    }
+
+    /**
      * Gets a string at the specified path
      *
      * @param path The path to get the string at <i>Must not be null</i>
@@ -585,4 +621,8 @@ public class JSONConfig {
         }
     }
 
+    @Override
+    public String toString() {
+        return object.toString();
+    }
 }

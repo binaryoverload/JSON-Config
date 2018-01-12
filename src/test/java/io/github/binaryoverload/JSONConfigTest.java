@@ -24,10 +24,17 @@
 
 package io.github.binaryoverload;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.io.StringBufferInputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -181,6 +188,19 @@ public class JSONConfigTest {
                 .collect(Collectors.joining("\n"));
         String compare = set.stream().collect(Collectors.joining("\n"));
         assertTrue(string.equals(compare));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testRemoveNegative() {
+        config.remove("items.properties.items");
+    }
+
+    @Test
+    public void testRemovePositive() throws UnsupportedEncodingException {
+        String object = config.getObject().toString();
+        config.remove("items.properties.id");
+        assertTrue(!config.getElement("items.properties.id").isPresent());
+        config = new JSONConfig(new ByteArrayInputStream(object.getBytes("UTF-8")));
     }
 
 }
