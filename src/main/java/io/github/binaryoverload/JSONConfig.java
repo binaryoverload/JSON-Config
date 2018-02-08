@@ -40,6 +40,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,8 +53,7 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    private int mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
-    private Object file;
+    Reader reader;
     private JsonObject object;
     private String pathSeparator = ".";
     private static Gson GSON = new GsonBuilder().serializeNulls().create();
@@ -76,9 +76,9 @@ public class JSONConfig {
      */
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
         Objects.requireNonNull(file);
-        this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+        reader = new FileReader(file);
+        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.file = file;
     }
 
     /**
@@ -101,9 +101,9 @@ public class JSONConfig {
         if (fileName.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
+        reader = new FileReader(fileName);
+        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.file = fileName;
     }
 
     /**
@@ -128,10 +128,10 @@ public class JSONConfig {
         Objects.requireNonNull(file);
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
-        this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+        reader = new FileReader(file);
+        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
         setPathSeparator(pathSeparator);
-        this.file = file;
     }
 
 
@@ -145,10 +145,10 @@ public class JSONConfig {
      */
     public JSONConfig(InputStream stream) {
         Objects.requireNonNull(stream);
-        this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)),
+        reader = new InputStreamReader(stream);
+        this.object = GSON.fromJson(new JsonReader(reader),
                 JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.file = stream;
     }
 
     /**
@@ -168,11 +168,11 @@ public class JSONConfig {
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        reader = new InputStreamReader(stream);
+        BufferedReader br = new BufferedReader(reader);
         this.object = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject.class);
         br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.file = stream;
     }
 
     /**
@@ -186,7 +186,6 @@ public class JSONConfig {
     public JSONConfig(JsonObject object) {
         Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
-        mode = -1;
     }
 
     /**
@@ -634,22 +633,13 @@ public class JSONConfig {
         return object.toString();
     }
 
+    /**
+     * Reloads the JSON config
+     *
+     * @throws NullPointerException if the config mode can't be reloaded
+     * @throws FileNotFoundException If the config file is not found
+     */
     public void reload() throws NullPointerException, FileNotFoundException {
-        if(mode == -1) {
-            throw new NullPointerException("Cannot reload from a JsonObject");
-        }
-        if (mode == 0) {
-            File file = (File) this.file;
-            this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
-        } else if(mode == 1) {
-            String fileName = (String) this.file;
-            this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
-        } else if(mode == 2) {
-            InputStream stream = (InputStream) this.file;
-            this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
-        } else {
-            throw new NullPointerException("Invalid Mode");
-        }
-
+        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
     }
 }
