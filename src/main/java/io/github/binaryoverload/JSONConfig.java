@@ -76,8 +76,8 @@ public class JSONConfig {
      */
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
         Objects.requireNonNull(file);
-        reader = new FileReader(file);
-        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
+        this.reader = new FileReader(file);
+        this.object = GSON.fromJson(new JsonReader(this.reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
@@ -101,8 +101,8 @@ public class JSONConfig {
         if (fileName.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        reader = new FileReader(fileName);
-        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
+        this.reader = new FileReader(fileName);
+        this.object = GSON.fromJson(new JsonReader(this.reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
@@ -128,8 +128,8 @@ public class JSONConfig {
         Objects.requireNonNull(file);
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
-        reader = new FileReader(file);
-        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
+        this.reader = new FileReader(file);
+        this.object = GSON.fromJson(new JsonReader(this.reader), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
         setPathSeparator(pathSeparator);
     }
@@ -145,8 +145,8 @@ public class JSONConfig {
      */
     public JSONConfig(InputStream stream) {
         Objects.requireNonNull(stream);
-        reader = new InputStreamReader(stream);
-        this.object = GSON.fromJson(new JsonReader(reader),
+        this.reader = new InputStreamReader(stream);
+        this.object = GSON.fromJson(new JsonReader(this.reader),
                 JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
@@ -168,8 +168,8 @@ public class JSONConfig {
         Objects.requireNonNull(pathSeparator);
         GeneralUtils.checkStringLength(pathSeparator, 1);
         setPathSeparator(pathSeparator);
-        reader = new InputStreamReader(stream);
-        BufferedReader br = new BufferedReader(reader);
+        this.reader = new InputStreamReader(stream);
+        BufferedReader br = new BufferedReader(this.reader);
         this.object = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject.class);
         br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
@@ -639,6 +639,6 @@ public class JSONConfig {
      * @throws NullPointerException if the config mode can't be reloaded
      */
     public void reload() throws NullPointerException {
-        this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
+        this.object = GSON.fromJson(new JsonReader(this.reader), JsonObject.class);
     }
 }
