@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    Reader reader;
+    private Reader reader;
     private JsonObject object;
     private String pathSeparator = ".";
     private static Gson GSON = new GsonBuilder().serializeNulls().create();
