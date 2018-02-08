@@ -637,9 +637,8 @@ public class JSONConfig {
      * Reloads the JSON config
      *
      * @throws NullPointerException if the config mode can't be reloaded
-     * @throws FileNotFoundException If the config file is not found
      */
-    public void reload() throws NullPointerException, FileNotFoundException {
+    public void reload() throws NullPointerException {
         this.object = GSON.fromJson(new JsonReader(reader), JsonObject.class);
     }
 }
