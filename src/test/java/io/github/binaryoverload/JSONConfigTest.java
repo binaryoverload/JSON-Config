@@ -26,18 +26,14 @@ package io.github.binaryoverload;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.io.*;
+import java.net.URISyntaxException;
 import org.junit.Test;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.io.StringBufferInputStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -201,6 +197,31 @@ public class JSONConfigTest {
         config.remove("items.properties.id");
         assertTrue(!config.getElement("items.properties.id").isPresent());
         config = new JSONConfig(new ByteArrayInputStream(object.getBytes("UTF-8")));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testReloadUnsupported() throws FileNotFoundException {
+        JSONConfig config = new JSONConfig(new JsonObject());
+        config.reload();
+    }
+
+    @Test
+    public void testReloadFile() throws IOException, URISyntaxException {
+        File file = new File(JSONConfig.class.getClassLoader().getResource("testfile.json").toURI());
+        JSONConfig config = new JSONConfig(file);
+        assertEquals(config.getString("title").get(), "Product set");
+
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("{\"title\":\"Product jet\",\"type\":\"array\",\"date\":10247893,\"items\":{\"title\":\"Product\",\"type\":\"object\"}}");
+        }
+
+        config.reload();
+        assertEquals(config.getString("title").get(), "Product jet");
+
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("{\"title\":\"Product set\",\"type\":\"array\",\"date\":10247893,\"items\":{\"title\":\"Product\",\"type\":\"object\"}}");
+        }
+
     }
 
 }
