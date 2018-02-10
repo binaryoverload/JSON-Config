@@ -640,11 +640,17 @@ public class JSONConfig {
         return object.toString();
     }
 
-    public void reload() throws NullPointerException, FileNotFoundException {
+    /**
+     * Reloads the config.
+     *
+     * @throws UnsupportedOperationException If trying to reload from JsonObject
+     * @throws IllegalStateException If somehow the mode is invalid
+     * @throws FileNotFoundException If the config file was moved/removed
+     */
+    public void reload() throws UnsupportedOperationException, IllegalStateException, FileNotFoundException {
         if(mode == -1) {
-            throw new NullPointerException("Cannot reload from a JsonObject");
-        }
-        if (mode == 0) {
+            throw new UnsupportedOperationException("Cannot reload from a JsonObject");
+        } else if (mode == 0) {
             File file = (File) this.file;
             this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         } else if(mode == 1) {
@@ -654,7 +660,7 @@ public class JSONConfig {
             InputStream stream = (InputStream) this.file;
             this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
         } else {
-            throw new NullPointerException("Invalid Mode");
+            throw new IllegalStateException("Invalid Mode");
         }
 
     }
