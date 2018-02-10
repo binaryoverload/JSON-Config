@@ -101,8 +101,8 @@ public class JSONConfig {
         if (fileName.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        this.reader = new FileReader(fileName);
-        this.object = GSON.fromJson(new JsonReader(this.reader), JsonObject.class);
+        this.mode = 1;
+        this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
     }
 
