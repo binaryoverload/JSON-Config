@@ -88,7 +88,7 @@ public class GeneralUtils {
     public static void verifyPath(String path, String pathSeparator) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(pathSeparator);
-        Matcher matcher = Pattern.compile("(.+(" + pathSeparator + ".*)+").matcher(path);
+        Matcher matcher = Pattern.compile("(.+(" + pathSeparator + ".)*)+").matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Malformed path");
         }
