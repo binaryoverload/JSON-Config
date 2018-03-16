@@ -78,17 +78,17 @@ public class GeneralUtils {
      * Verifies a path with a specific path separator
      *
      * @param path The path to verify
-     * @param pathSeparator The path separator to use for verification <i>Cannot be null, empty
+     * @param ps The path separator to use for verification <i>Cannot be null, empty
      *                      or any length other than 1</i>
      * @throws NullPointerException if either of the variables are null
      * @throws IllegalArgumentException if the path separator is empty or any length other than 1
      * @throws IllegalArgumentException if the path supplied is malformed
      * @since 2.1
      */
-    public static void verifyPath(String path, String pathSeparator) {
+    public static void verifyPath(String path, String ps) {
         Objects.requireNonNull(path);
-        Objects.requireNonNull(pathSeparator);
-        Matcher matcher = Pattern.compile("(.+(" + pathSeparator + ".)*)+").matcher(path);
+        Objects.requireNonNull(ps);
+        Matcher matcher = Pattern.compile("([^" + ps + "]+(\\.[^" + ps + "])*)+").matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Malformed path");
         }
