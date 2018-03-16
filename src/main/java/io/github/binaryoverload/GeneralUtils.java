@@ -88,7 +88,7 @@ public class GeneralUtils {
     public static void verifyPath(String path, String ps) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(ps);
-        Matcher matcher = Pattern.compile("([^" + ps + "]+(\\.[^" + ps + "])*)+").matcher(path);
+        Matcher matcher = Pattern.compile("([^" + ps + "]+(" + ps + "[^" + ps + "])*)+").matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Malformed path");
         }
