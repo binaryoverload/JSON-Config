@@ -50,6 +50,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -61,12 +62,15 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    private int mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
+    private byte mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
     private Object file;
     private JsonObject object;
     private char pathSeparator = '.';
     private static Gson GSON = new GsonBuilder().serializeNulls().create();
+    private char[] allowedSpecialCharacters = new char[]{'-', '+', '_', '$'};
 
+    private Pattern pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+    private Pattern splitPattern = Pattern.compile("\\" + pathSeparator);
 
     /**
      * Recommended constructor for most file based applications
@@ -84,6 +88,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(File file) throws FileNotFoundException, NullPointerException {
+        this();
         Objects.requireNonNull(file);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
@@ -107,6 +112,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(String fileName) throws FileNotFoundException, NullPointerException {
+        this();
         Objects.requireNonNull(fileName);
         if (fileName.isEmpty()) {
             throw new IllegalArgumentException();
@@ -121,9 +127,11 @@ public class JSONConfig {
      * Constructor for use with file-based applications and specification
      * of a custom path separator
      *
-     * @param file          The file must exist and not be a directory
-     * @param pathSeparator The separator to use for this config <i>This cannot be null, empty or
-     *                      any length other than 1</i>
+     * @param file                The file must exist and not be a directory
+     * @param pathSeparator       The separator to use for this config <i>This cannot be null, empty or
+     *                            any length other than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws FileNotFoundException    if the file does not exist,
      *                                  is a directory rather than a regular file,
      *                                  or for some other reason cannot be opened for
@@ -135,7 +143,8 @@ public class JSONConfig {
      * @see File
      * @since 1.0
      */
-    public JSONConfig(File file, char pathSeparator) throws FileNotFoundException {
+    public JSONConfig(File file, char pathSeparator, char[] allowedSpecialChars) throws FileNotFoundException {
+        this(allowedSpecialChars);
         Objects.requireNonNull(file);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
@@ -154,6 +163,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(InputStream stream) {
+        this();
         Objects.requireNonNull(stream);
         this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)),
                 JsonObject.class);
@@ -165,16 +175,19 @@ public class JSONConfig {
     /**
      * More advanced constructor allowing users to specify their own input stream
      *
-     * @param stream        The stream to be used for the JSON Object <i>This cannot be null</i>
-     * @param pathSeparator The custom path separator to use for this config <i>This cannot be
-     *                      null, empty or any other lenth than 1</i>
+     * @param stream              The stream to be used for the JSON Object <i>This cannot be null</i>
+     * @param pathSeparator       The custom path separator to use for this config <i>This cannot be
+     *                            null, empty or any other lenth than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws NullPointerException     if any of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @throws IOException              if the stream is invalid or malformatted
      * @see InputStream
-     * * @since 1.0
+     * @since 1.0
      */
-    public JSONConfig(InputStream stream, char pathSeparator) throws IOException {
+    public JSONConfig(InputStream stream, char pathSeparator, char[] allowedSpecialChars) throws IOException {
+        this(allowedSpecialChars);
         Objects.requireNonNull(stream);
         setPathSeparator(pathSeparator);
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));
@@ -194,6 +207,7 @@ public class JSONConfig {
      * @since 1.0
      */
     public JSONConfig(JsonObject object) {
+        this();
         Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
         mode = -1;
@@ -202,18 +216,28 @@ public class JSONConfig {
     /**
      * Basic Constructor that sets a JSONObject as well as the path separator
      *
-     * @param object        The object to assign to the config <i>Cannot be null</i>
-     * @param pathSeparator The path separator to be set <i>Cannot be null, empty or any length
-     *                      other than 1</i>
+     * @param object              The object to assign to the config <i>Cannot be null</i>
+     * @param pathSeparator       The path separator to be set <i>Cannot be null, empty or any length
+     *                            other than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws NullPointerException     if either of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @since 1.0
      */
-    public JSONConfig(JsonObject object, char pathSeparator) {
+    public JSONConfig(JsonObject object, char pathSeparator, char[] allowedSpecialChars) {
+        this(allowedSpecialChars);
         Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
         setPathSeparator(pathSeparator);
         this.mode = -1;
+    }
+
+    private JSONConfig(char[] allowedSpecialCharacters) {
+        this.allowedSpecialCharacters = allowedSpecialCharacters;
+    }
+
+    private JSONConfig() {
     }
 
     /**
@@ -237,6 +261,12 @@ public class JSONConfig {
      */
     public synchronized void setPathSeparator(char pathSeparator) {
         this.pathSeparator = pathSeparator;
+        if (new String(allowedSpecialCharacters).contains(String.valueOf(pathSeparator)))
+            throw new IllegalArgumentException("Cannot set path separator to an allowed special character!");
+
+        // Recompile the pattern on a new path separator.
+        this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+        this.splitPattern = Pattern.compile(GeneralUtils.escapeRegex(String.valueOf(pathSeparator)));
     }
 
     /**
@@ -274,7 +304,7 @@ public class JSONConfig {
      */
     public synchronized Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         Optional<JsonElement> element = getElement(path);
         if (!element.isPresent()) {
             return Optional.empty();
@@ -307,9 +337,9 @@ public class JSONConfig {
         if (path.isEmpty()) {
             return Optional.of(json);
         } else {
-            GeneralUtils.verifyPath(path, this.pathSeparator);
+            GeneralUtils.verifyPath(path, pathPattern);
         }
-        String[] subpaths = path.split("\\" + pathSeparator);
+        String[] subpaths = splitPattern.split(path);
         String subpath = subpaths[0];
         if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
             if (allowNull) {
@@ -380,9 +410,9 @@ public class JSONConfig {
         if (path.isEmpty()) {
             root = GSON.toJsonTree(object).getAsJsonObject();
         } else {
-            GeneralUtils.verifyPath(path, this.pathSeparator);
+            GeneralUtils.verifyPath(path, pathPattern);
         }
-        String[] subpaths = path.split("\\" + pathSeparator);
+        String[] subpaths = splitPattern.split(path);
         for (int j = 0; j < subpaths.length; j++) {
             if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
                 root.add(subpaths[j], new JsonObject());
@@ -412,7 +442,7 @@ public class JSONConfig {
      * @throws IllegalStateException if the parent of the specified path is not an object
      */
     public void remove(String path) {
-        String[] paths = path.split("\\" + pathSeparator);
+        String[] paths = splitPattern.split(path);
         if (!getElement(path).isPresent()) {
             throw new IllegalStateException("Element not present!");
         }
@@ -441,7 +471,7 @@ public class JSONConfig {
      * @since 2.1
      */
     public synchronized Optional<String> getString(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isString()) {
@@ -464,7 +494,7 @@ public class JSONConfig {
      * @since 2.1
      */
     public synchronized OptionalInt getInteger(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalInt.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -487,7 +517,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized OptionalDouble getDouble(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalDouble.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -510,7 +540,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized OptionalLong getLong(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalLong.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -533,7 +563,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized Optional<Boolean> getBoolean(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isBoolean()) {
@@ -556,7 +586,7 @@ public class JSONConfig {
      * @since 2.5
      */
     public synchronized Optional<JsonArray> getArray(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonArray()) {
@@ -661,6 +691,5 @@ public class JSONConfig {
         } else {
             throw new IllegalStateException("Invalid Mode");
         }
-
     }
 }

@@ -52,16 +52,21 @@ public class GeneralUtilsTest {
 
     @Test
     public void verifyPathPositive() {
-        GeneralUtils.verifyPath("cat.cat.cat", '.');
-        GeneralUtils.verifyPath("ca-t.cat.cat", '.');
-        GeneralUtils.verifyPath("cat_cat.cat", '.');
-        GeneralUtils.verifyPath("cat-cat-cat", '-');
+        GeneralUtils.verifyPath("cat.cat.cat", '.', new char[]{});
+        GeneralUtils.verifyPath("ca-t.cat.cat", '.', new char[]{'-'});
+        GeneralUtils.verifyPath("cat_cat.cat", '.', new char[]{'_'});
+        GeneralUtils.verifyPath("cat-cat-cat", '-', new char[]{});
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void verifyPathNegative() {
-        GeneralUtils.verifyPath("cat.cat.cat..", '.');
-        GeneralUtils.verifyPath("cat-cat-cat-", '-');
+        GeneralUtils.verifyPath("cat.cat.cat..", '.', new char[]{});
+        GeneralUtils.verifyPath("cat-cat-cat-", '-', new char[]{});
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void verifySpecialCharacters() {
+        GeneralUtils.verifyPath("cat.cat", '.', new char[]{'-', '.', '_'});
+        GeneralUtils.verifyPath("cat-cat.cat", '-', new char[]{'-', '.', '_'});
+    }
 }
