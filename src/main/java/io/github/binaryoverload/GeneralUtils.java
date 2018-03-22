@@ -64,8 +64,6 @@ public class GeneralUtils {
      */
     public static void checkStringLength(String string, int length, boolean emptyCheck) {
         Objects.requireNonNull(string);
-        Objects.requireNonNull(length);
-        Objects.requireNonNull(emptyCheck);
         if (string.isEmpty() && emptyCheck) {
             throw new IllegalArgumentException();
         }
@@ -85,9 +83,8 @@ public class GeneralUtils {
      * @throws IllegalArgumentException if the path supplied is malformed
      * @since 2.1
      */
-    public static void verifyPath(String path, String ps) {
+    public static void verifyPath(String path, char ps) {
         Objects.requireNonNull(path);
-        Objects.requireNonNull(ps);
         Matcher matcher = Pattern.compile("([^" + ps + "]+(" + ps + "[^" + ps + "])*)+").matcher(path);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Malformed path, could not match '" + path + "' with seperator '" + ps + "'");
