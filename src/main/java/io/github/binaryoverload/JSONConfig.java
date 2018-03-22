@@ -123,10 +123,11 @@ public class JSONConfig {
      * Constructor for use with file-based applications and specification
      * of a custom path separator
      *
-     * @param file          The file must exist and not be a directory
-     * @param pathSeparator The separator to use for this config <i>This cannot be null, empty or
-     *                      any length other than 1</i>
-     * @param allowedSpecialChars The allowed special characters
+     * @param file                The file must exist and not be a directory
+     * @param pathSeparator       The separator to use for this config <i>This cannot be null, empty or
+     *                            any length other than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws FileNotFoundException    if the file does not exist,
      *                                  is a directory rather than a regular file,
      *                                  or for some other reason cannot be opened for
@@ -170,14 +171,16 @@ public class JSONConfig {
     /**
      * More advanced constructor allowing users to specify their own input stream
      *
-     * @param stream        The stream to be used for the JSON Object <i>This cannot be null</i>
-     * @param pathSeparator The custom path separator to use for this config <i>This cannot be
-     *                      null, empty or any other lenth than 1</i>
+     * @param stream              The stream to be used for the JSON Object <i>This cannot be null</i>
+     * @param pathSeparator       The custom path separator to use for this config <i>This cannot be
+     *                            null, empty or any other lenth than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws NullPointerException     if any of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @throws IOException              if the stream is invalid or malformatted
      * @see InputStream
-     * * @since 1.0
+     * @since 1.0
      */
     public JSONConfig(InputStream stream, char pathSeparator, char[] allowedSpecialChars) throws IOException {
         this(allowedSpecialChars);
@@ -209,9 +212,11 @@ public class JSONConfig {
     /**
      * Basic Constructor that sets a JSONObject as well as the path separator
      *
-     * @param object        The object to assign to the config <i>Cannot be null</i>
-     * @param pathSeparator The path separator to be set <i>Cannot be null, empty or any length
-     *                      other than 1</i>
+     * @param object              The object to assign to the config <i>Cannot be null</i>
+     * @param pathSeparator       The path separator to be set <i>Cannot be null, empty or any length
+     *                            other than 1</i>
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
      * @throws NullPointerException     if either of the passed arguments are null
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @since 1.0
