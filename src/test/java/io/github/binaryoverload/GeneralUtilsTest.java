@@ -64,4 +64,9 @@ public class GeneralUtilsTest {
         GeneralUtils.verifyPath("cat-cat-cat-", '-', new char[]{});
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void verifySpecialCharacters() {
+        GeneralUtils.verifyPath("cat.cat", '.', new char[]{'-', '.', '_'});
+        GeneralUtils.verifyPath("cat-cat.cat", '-', new char[]{'-', '.', '_'});
+    }
 }

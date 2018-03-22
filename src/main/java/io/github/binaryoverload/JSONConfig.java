@@ -50,6 +50,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -61,12 +62,15 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    private int mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
+    private byte mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
     private Object file;
     private JsonObject object;
     private char pathSeparator = '.';
     private static Gson GSON = new GsonBuilder().serializeNulls().create();
     private char[] allowedSpecialCharacters = new char[]{'-', '+', '_', '$'};
+
+    private Pattern pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+    private Pattern splitPattern = Pattern.compile("\\" + pathSeparator);
 
     /**
      * Recommended constructor for most file based applications
@@ -259,6 +263,10 @@ public class JSONConfig {
         this.pathSeparator = pathSeparator;
         if (new String(allowedSpecialCharacters).contains(String.valueOf(pathSeparator)))
             throw new IllegalArgumentException("Cannot set path separator to an allowed special character!");
+
+        // Recompile the pattern on a new path separator.
+        this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+        this.splitPattern = Pattern.compile(GeneralUtils.escapeRegex(String.valueOf(pathSeparator)));
     }
 
     /**
@@ -296,7 +304,7 @@ public class JSONConfig {
      */
     public synchronized Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         Optional<JsonElement> element = getElement(path);
         if (!element.isPresent()) {
             return Optional.empty();
@@ -329,9 +337,9 @@ public class JSONConfig {
         if (path.isEmpty()) {
             return Optional.of(json);
         } else {
-            GeneralUtils.verifyPath(path, this.pathSeparator, allowedSpecialCharacters);
+            GeneralUtils.verifyPath(path, pathPattern);
         }
-        String[] subpaths = path.split("\\" + pathSeparator);
+        String[] subpaths = splitPattern.split(path);
         String subpath = subpaths[0];
         if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
             if (allowNull) {
@@ -402,9 +410,9 @@ public class JSONConfig {
         if (path.isEmpty()) {
             root = GSON.toJsonTree(object).getAsJsonObject();
         } else {
-            GeneralUtils.verifyPath(path, this.pathSeparator, allowedSpecialCharacters);
+            GeneralUtils.verifyPath(path, pathPattern);
         }
-        String[] subpaths = path.split("\\" + pathSeparator);
+        String[] subpaths = splitPattern.split(path);
         for (int j = 0; j < subpaths.length; j++) {
             if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
                 root.add(subpaths[j], new JsonObject());
@@ -434,7 +442,7 @@ public class JSONConfig {
      * @throws IllegalStateException if the parent of the specified path is not an object
      */
     public void remove(String path) {
-        String[] paths = path.split("\\" + pathSeparator);
+        String[] paths = splitPattern.split(path);
         if (!getElement(path).isPresent()) {
             throw new IllegalStateException("Element not present!");
         }
@@ -463,7 +471,7 @@ public class JSONConfig {
      * @since 2.1
      */
     public synchronized Optional<String> getString(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isString()) {
@@ -486,7 +494,7 @@ public class JSONConfig {
      * @since 2.1
      */
     public synchronized OptionalInt getInteger(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalInt.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -509,7 +517,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized OptionalDouble getDouble(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalDouble.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -532,7 +540,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized OptionalLong getLong(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalLong.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isNumber()) {
@@ -555,7 +563,7 @@ public class JSONConfig {
      * @since 2.2
      */
     public synchronized Optional<Boolean> getBoolean(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonPrimitive() && getElement(path).get().getAsJsonPrimitive().isBoolean()) {
@@ -578,7 +586,7 @@ public class JSONConfig {
      * @since 2.5
      */
     public synchronized Optional<JsonArray> getArray(String path) {
-        GeneralUtils.verifyPath(path, pathSeparator, allowedSpecialCharacters);
+        GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
         } else if (getElement(path).get().isJsonArray()) {

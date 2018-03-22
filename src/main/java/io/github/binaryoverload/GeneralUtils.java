@@ -24,7 +24,6 @@
 
 package io.github.binaryoverload;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,34 +73,83 @@ public class GeneralUtils {
     /**
      * Verifies a path with a specific path separator
      *
-     * @param path                     The path to verify
-     * @param ps                       The path separator to use for verification <i>Cannot be null, empty
-     *                                 or any length other than 1</i>
-     * @param allowedSpecialCharacters The special characters which are allowed in the path name.
+     * @param path    The path to verify
+     * @param pattern The regex pattern which is used to check if the path matches.
      * @throws NullPointerException     if either of the variables are null
      * @throws IllegalArgumentException if the path separator is empty or any length other than 1
      * @throws IllegalArgumentException if the path supplied is malformed
      * @since 2.1
      */
-    public static void verifyPath(String path, char ps, char[] allowedSpecialCharacters) {
+    public static void verifyPath(String path, Pattern pattern) {
         Objects.requireNonNull(path);
-        String escapedSpecialChars = "";
-        if (allowedSpecialCharacters.length > 0)
-            escapedSpecialChars = escapeRegex(new String(allowedSpecialCharacters));
-
-        Matcher matcher = Pattern.compile("([\\w" + escapedSpecialChars + "]+[" + ps + "])+" +
-                "([\\w" + escapedSpecialChars + "]+)").matcher(path);
+        Matcher matcher = pattern.matcher(path);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException(String.format("Malformed path, could not match '%s' with separator '%s'. " +
-                    "Allowed charset: %s",
+            throw new IllegalArgumentException(String.format("Malformed path, could not match '%s'. Regex: %s",
                     path,
-                    ps,
-                    Arrays.toString(allowedSpecialCharacters)
+                    pattern.toString()
             ));
         }
     }
 
-    private static String escapeRegex(String s) {
+    /**
+     * Verifies a path with a specific path separator
+     *
+     * @param path                The path to verify.
+     * @param ps                  The path separator to use for verification.
+     * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
+     *                            with the path separator.
+     * @throws NullPointerException     if either of the variables are null
+     * @throws IllegalArgumentException if the path separator is empty or any length other than 1
+     * @throws IllegalArgumentException if the path supplied is malformed
+     * @since 2.1
+     */
+    public static void verifyPath(String path, char ps, char[] allowedSpecialChars) {
+        Objects.requireNonNull(path);
+        if (!verifyNoConflict(ps, allowedSpecialChars))
+            throw new IllegalArgumentException("The allowedSpecialChars array contains the path separator!");
+        Matcher matcher = generatePathPattern(ps, allowedSpecialChars).matcher(path);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException(String.format("Malformed path, could not match '%s'. Regex: %s",
+                    path,
+                    matcher.toString()
+            ));
+        }
+    }
+
+    /**
+     * Verify that the char array (in this case special character array) does not contain char
+     * (in this case path separator).
+     *
+     * @param c      The char to check for.
+     * @param cArray The array to iterate through.
+     * @return True if the char is not in the array, false otherwise.
+     */
+    public static boolean verifyNoConflict(char c, char[] cArray) {
+        for (char cc : cArray)
+            if (c == cc)
+                return false;
+        return true;
+    }
+
+    protected static String escapeRegex(String s) {
+        if (s == null || s.isEmpty()) return "";
+
         return s.replaceAll(s, "\\\\$0");
+    }
+
+    /**
+     * Generate a Pattern (compiled) from pathSeparator char and allowedSpecialCharacters char array.
+     * You should only run this when it is needed and store the return. You should NOT run this multiple times!
+     *
+     * @param pathSeparator            The path separator char to include in the regex.
+     * @param allowedSpecialCharacters The allowed special characters which will be escaped. Keep in mind
+     *                                 this will not verify a conflict. See {@link #verifyNoConflict(char, char[])}
+     *                                 for that.
+     * @return The compiled Pattern used for checking a valid path with the specified pathSeperator and
+     * allowedSpecialCharacters.
+     */
+    public static Pattern generatePathPattern(char pathSeparator, char[] allowedSpecialCharacters) {
+        String allowed = new String(allowedSpecialCharacters);
+        return Pattern.compile(String.format("([\\w%s]+[%s]?)+([\\w%s]+)*", allowed, pathSeparator, allowed));
     }
 }
