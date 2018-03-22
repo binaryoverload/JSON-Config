@@ -24,6 +24,7 @@
 
 package io.github.binaryoverload;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,19 +74,34 @@ public class GeneralUtils {
     /**
      * Verifies a path with a specific path separator
      *
-     * @param path The path to verify
-     * @param ps   The path separator to use for verification <i>Cannot be null, empty
-     *             or any length other than 1</i>
+     * @param path                     The path to verify
+     * @param ps                       The path separator to use for verification <i>Cannot be null, empty
+     *                                 or any length other than 1</i>
+     * @param allowedSpecialCharacters The special characters which are allowed in the path name.
      * @throws NullPointerException     if either of the variables are null
      * @throws IllegalArgumentException if the path separator is empty or any length other than 1
      * @throws IllegalArgumentException if the path supplied is malformed
      * @since 2.1
      */
-    public static void verifyPath(String path, char ps) {
+    public static void verifyPath(String path, char ps, char[] allowedSpecialCharacters) {
         Objects.requireNonNull(path);
-        Matcher matcher = Pattern.compile("([^" + ps + "]+(" + ps + "[^" + ps + "])*)+").matcher(path);
+        String escapedSpecialChars = "";
+        if (allowedSpecialCharacters.length > 0)
+            escapedSpecialChars = escapeRegex(new String(allowedSpecialCharacters));
+
+        Matcher matcher = Pattern.compile("([\\w" + escapedSpecialChars + "]+[" + ps + "])+" +
+                "([\\w" + escapedSpecialChars + "]+)").matcher(path);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Malformed path, could not match '" + path + "' with seperator '" + ps + "'");
+            throw new IllegalArgumentException(String.format("Malformed path, could not match '%s' with separator '%s'. " +
+                    "Allowed charset: %s",
+                    path,
+                    ps,
+                    Arrays.toString(allowedSpecialCharacters)
+            ));
         }
+    }
+
+    private static String escapeRegex(String s) {
+        return s.replaceAll(s, "\\\\$0");
     }
 }
