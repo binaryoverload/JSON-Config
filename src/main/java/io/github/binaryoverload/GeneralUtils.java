@@ -90,7 +90,7 @@ public class GeneralUtils {
         Objects.requireNonNull(ps);
         Matcher matcher = Pattern.compile("([^" + ps + "]+(" + ps + "[^" + ps + "])*)+").matcher(path);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Malformed path");
+            throw new IllegalArgumentException("Malformed path, could not match '" + path + "' with seperator '" + ps + "'");
         }
     }
 
