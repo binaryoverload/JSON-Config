@@ -40,7 +40,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -305,8 +314,8 @@ public class JSONConfig {
         if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
             if (allowNull) {
                 return Optional.of(JsonNull.INSTANCE);
-                }
-                return Optional.empty();
+            }
+            return Optional.empty();
         } else if (json.get(subpath).isJsonObject()) {
             if (subpaths.length == 1 && subpaths[0].isEmpty()) {
                 return Optional.of(json);
@@ -634,19 +643,19 @@ public class JSONConfig {
      * Reloads the config.
      *
      * @throws UnsupportedOperationException If trying to reload from JsonObject
-     * @throws IllegalStateException If somehow the mode is invalid
-     * @throws FileNotFoundException If the config file was moved/removed
+     * @throws IllegalStateException         If somehow the mode is invalid
+     * @throws FileNotFoundException         If the config file was moved/removed
      */
     public void reload() throws UnsupportedOperationException, IllegalStateException, FileNotFoundException {
-        if(mode == -1) {
+        if (mode == -1) {
             throw new UnsupportedOperationException("Cannot reload from a JsonObject");
         } else if (mode == 0) {
             File file = (File) this.file;
             this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
-        } else if(mode == 1) {
+        } else if (mode == 1) {
             String fileName = (String) this.file;
             this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
-        } else if(mode == 2) {
+        } else if (mode == 2) {
             InputStream stream = (InputStream) this.file;
             this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
         } else {

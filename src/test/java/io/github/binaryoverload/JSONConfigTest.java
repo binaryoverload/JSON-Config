@@ -24,7 +24,6 @@
 
 package io.github.binaryoverload;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.*;
 import java.net.URISyntaxException;

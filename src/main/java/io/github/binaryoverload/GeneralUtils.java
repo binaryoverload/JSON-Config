@@ -42,9 +42,8 @@ public class GeneralUtils {
      *
      * @param string The string to check
      * @param length The length to check the string by
-     * @throws NullPointerException if either argument is null
+     * @throws NullPointerException     if either argument is null
      * @throws IllegalArgumentException if the string doesn't comply with the conditions
-     *
      * @since 1.1
      */
     public static void checkStringLength(String string, int length) {
@@ -54,12 +53,11 @@ public class GeneralUtils {
     /**
      * Helper method to check string length
      *
-     * @param string The string to check
-     * @param length The length to check the string by
+     * @param string     The string to check
+     * @param length     The length to check the string by
      * @param emptyCheck Whether to check if the string is empty or not
-     * @throws NullPointerException if either argument is null
+     * @throws NullPointerException     if either argument is null
      * @throws IllegalArgumentException if the string doesn't comply with the conditions
-     *
      * @since 1.1
      */
     public static void checkStringLength(String string, int length, boolean emptyCheck) {
@@ -76,9 +74,9 @@ public class GeneralUtils {
      * Verifies a path with a specific path separator
      *
      * @param path The path to verify
-     * @param ps The path separator to use for verification <i>Cannot be null, empty
-     *                      or any length other than 1</i>
-     * @throws NullPointerException if either of the variables are null
+     * @param ps   The path separator to use for verification <i>Cannot be null, empty
+     *             or any length other than 1</i>
+     * @throws NullPointerException     if either of the variables are null
      * @throws IllegalArgumentException if the path separator is empty or any length other than 1
      * @throws IllegalArgumentException if the path supplied is malformed
      * @since 2.1
@@ -90,7 +88,4 @@ public class GeneralUtils {
             throw new IllegalArgumentException("Malformed path, could not match '" + path + "' with seperator '" + ps + "'");
         }
     }
-
-
-
 }
