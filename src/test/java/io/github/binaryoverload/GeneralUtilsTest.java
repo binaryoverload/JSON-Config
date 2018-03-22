@@ -41,7 +41,7 @@ public class GeneralUtilsTest {
         GeneralUtils.checkStringLength("ss", 2);
     }
 
-    @Test()
+    @Test
     public void checkStringLengthNegative() {
         thrown.expect(IllegalArgumentException.class);
         GeneralUtils.checkStringLength("", 0, true);
@@ -53,16 +53,16 @@ public class GeneralUtilsTest {
 
     @Test
     public void verifyPathPositive() {
-        GeneralUtils.verifyPath("cat.cat.cat", ".");
-        GeneralUtils.verifyPath("ca-t.cat.cat", ".");
-        GeneralUtils.verifyPath("cat_cat.cat", ".");
-        GeneralUtils.verifyPath("cat-cat-cat", "-");
+        GeneralUtils.verifyPath("cat.cat.cat", '.');
+        GeneralUtils.verifyPath("ca-t.cat.cat", '.');
+        GeneralUtils.verifyPath("cat_cat.cat", '.');
+        GeneralUtils.verifyPath("cat-cat-cat", '-');
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void verifyPathNegative() {
-        GeneralUtils.verifyPath("cat.cat.cat..", ".");
-        GeneralUtils.verifyPath("cat-cat-cat-", "-");
+        GeneralUtils.verifyPath("cat.cat.cat..", '.');
+        GeneralUtils.verifyPath("cat-cat-cat-", '-');
     }
 
 }
