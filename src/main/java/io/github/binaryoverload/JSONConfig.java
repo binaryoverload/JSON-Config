@@ -316,6 +316,24 @@ public class JSONConfig {
     }
 
     /**
+     * Gets the list of chars that are allowed in a path
+     *
+     * @return List of allowed special characters
+     */
+    public char[] getAllowedSpecialCharacters() {
+        return allowedSpecialCharacters;
+    }
+
+    /**
+     * Sets the list of special characters allowed
+     *
+     * @param allowedSpecialCharacters The list of special characters to be allowed
+     */
+    public void setAllowedSpecialCharacters(char[] allowedSpecialCharacters) {
+        this.allowedSpecialCharacters = allowedSpecialCharacters;
+    }
+
+    /**
      * Method to get a JSON Element from a specified path
      * <p>
      * <strong>It is not recommended to use this method! Use
