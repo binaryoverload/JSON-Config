@@ -311,7 +311,7 @@ public class JSONConfig {
         } else if (!element.get().isJsonObject()) {
             throw new IllegalStateException("The element at the specified path is not a JSON object");
         } else {
-            return Optional.of(new JSONConfig(element.get().getAsJsonObject()));
+            return Optional.of(new JSONConfig(element.get().getAsJsonObject(), this.pathSeparator, this.allowedSpecialCharacters));
         }
     }
 
