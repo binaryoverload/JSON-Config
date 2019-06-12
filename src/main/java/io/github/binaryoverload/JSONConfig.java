@@ -304,7 +304,6 @@ public class JSONConfig {
      */
     public synchronized Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
-        GeneralUtils.verifyPath(path, pathPattern);
         Optional<JsonElement> element = getElement(path);
         if (!element.isPresent()) {
             return Optional.empty();
