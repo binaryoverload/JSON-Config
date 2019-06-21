@@ -330,6 +330,7 @@ public class JSONConfig {
      */
     public void setAllowedSpecialCharacters(char[] allowedSpecialCharacters) {
         this.allowedSpecialCharacters = allowedSpecialCharacters;
+        this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
     }
 
     /**
