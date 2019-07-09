@@ -50,6 +50,9 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -62,15 +65,19 @@ import java.util.stream.Collectors;
  */
 public class JSONConfig {
 
-    private byte mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
+    private MediaType mode; // 0 = File, 1 = String, 2 = Input Stream, -1 = JsonObject
     private Object file;
     private JsonObject object;
     private char pathSeparator = '.';
     private static Gson GSON = new GsonBuilder().serializeNulls().create();
     private char[] allowedSpecialCharacters = new char[]{'-', '+', '_', '$'};
 
+    private ReadWriteLock configLock = new ReentrantReadWriteLock();
+    private Lock readLock = configLock.readLock();
+    private Lock writeLock = configLock.writeLock();
+
     private Pattern pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
-    private Pattern splitPattern = Pattern.compile("\\" + pathSeparator);
+    private Pattern splitPattern = Pattern.compile(Pattern.quote(String.valueOf(pathSeparator)));
 
     /**
      * Recommended constructor for most file based applications
@@ -92,7 +99,7 @@ public class JSONConfig {
         Objects.requireNonNull(file);
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.mode = 0;
+        this.mode = MediaType.FILE;
         this.file = file;
     }
 
@@ -117,7 +124,7 @@ public class JSONConfig {
         if (fileName.isEmpty()) {
             throw new IllegalArgumentException();
         }
-        this.mode = 1;
+        this.mode = MediaType.FILE_NAME;
         this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
         this.file = fileName;
@@ -149,7 +156,7 @@ public class JSONConfig {
         this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
         setPathSeparator(pathSeparator);
-        this.mode = 0;
+        this.mode = MediaType.FILE;
         this.file = file;
     }
 
@@ -165,10 +172,9 @@ public class JSONConfig {
     public JSONConfig(InputStream stream) {
         this();
         Objects.requireNonNull(stream);
-        this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)),
-                JsonObject.class);
+        this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.mode = 2;
+        this.mode = MediaType.INPUT_STREAM;
         this.file = stream;
     }
 
@@ -194,7 +200,7 @@ public class JSONConfig {
         this.object = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject.class);
         br.close();
         Objects.requireNonNull(this.getObject(), "Input is empty!");
-        this.mode = 2;
+        this.mode = MediaType.INPUT_STREAM;
         this.file = stream;
     }
 
@@ -210,7 +216,7 @@ public class JSONConfig {
         this();
         Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
-        mode = -1;
+        mode = MediaType.JSON_OBJECT;
     }
 
     /**
@@ -230,15 +236,14 @@ public class JSONConfig {
         Objects.requireNonNull(object, "Input is empty!");
         this.object = object;
         setPathSeparator(pathSeparator);
-        this.mode = -1;
+        this.mode = MediaType.JSON_OBJECT;
     }
 
     private JSONConfig(char[] allowedSpecialCharacters) {
         this.allowedSpecialCharacters = allowedSpecialCharacters;
     }
 
-    private JSONConfig() {
-    }
+    private JSONConfig() {}
 
     /**
      * Gets the path separator for this config
@@ -246,7 +251,7 @@ public class JSONConfig {
      * @return The path separator
      * @since 1.0
      */
-    public synchronized char getPathSeparator() {
+    public char getPathSeparator() {
         return pathSeparator;
     }
 
@@ -259,14 +264,22 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty of any length other than 1
      * @since 1.0
      */
-    public synchronized void setPathSeparator(char pathSeparator) {
-        this.pathSeparator = pathSeparator;
-        if (new String(allowedSpecialCharacters).contains(String.valueOf(pathSeparator)))
-            throw new IllegalArgumentException("Cannot set path separator to an allowed special character!");
+    public void setPathSeparator(char pathSeparator) {
+        writeLock.lock();
+        try {
+            this.pathSeparator = pathSeparator;
+            for (char allowedChar : allowedSpecialCharacters) {
+                if (allowedChar == pathSeparator) {
+                    throw new IllegalArgumentException("Cannot set path separator to an allowed special character!");
+                }
+            }
 
-        // Recompile the pattern on a new path separator.
-        this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
-        this.splitPattern = Pattern.compile(GeneralUtils.escapeRegex(String.valueOf(pathSeparator)));
+            // Recompile the pattern on a new path separator.
+            this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+            this.splitPattern = Pattern.compile(Pattern.quote(String.valueOf(pathSeparator)));
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -275,8 +288,13 @@ public class JSONConfig {
      * @return The JSON Object associated with this config
      * @since 1.0
      */
-    public synchronized JsonObject getObject() {
-        return object;
+    public JsonObject getObject() {
+        readLock.lock();
+        try {
+            return object.deepCopy();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -286,9 +304,14 @@ public class JSONConfig {
      * @throws NullPointerException if the object is null
      * @since 1.0
      */
-    public synchronized void setObject(JsonObject object) {
+    public void setObject(JsonObject object) {
         Objects.requireNonNull(object);
-        this.object = object;
+        writeLock.lock();
+        try {
+            this.object = object;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -302,15 +325,20 @@ public class JSONConfig {
      * @throws IllegalStateException if the element at the path is not a JSON object
      * @since 2.3
      */
-    public synchronized Optional<JSONConfig> getSubConfig(String path) {
+    public Optional<JSONConfig> getSubConfig(String path) {
         Objects.requireNonNull(path);
-        Optional<JsonElement> element = getElement(path);
-        if (!element.isPresent()) {
-            return Optional.empty();
-        } else if (!element.get().isJsonObject()) {
-            throw new IllegalStateException("The element at the specified path is not a JSON object");
-        } else {
-            return Optional.of(new JSONConfig(element.get().getAsJsonObject(), this.pathSeparator, this.allowedSpecialCharacters));
+        readLock.lock();
+        try {
+            Optional<JsonElement> element = getElement(path);
+            if (!element.isPresent()) {
+                return Optional.empty();
+            } else if (!element.get().isJsonObject()) {
+                throw new IllegalStateException("The element at the specified path is not a JSON object");
+            } else {
+                return Optional.of(new JSONConfig(element.get().getAsJsonObject(), this.pathSeparator, this.allowedSpecialCharacters));
+            }
+        } finally {
+            readLock.unlock();
         }
     }
 
@@ -320,7 +348,12 @@ public class JSONConfig {
      * @return List of allowed special characters
      */
     public char[] getAllowedSpecialCharacters() {
-        return allowedSpecialCharacters;
+        readLock.lock();
+        try {
+            return this.allowedSpecialCharacters.clone();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -329,8 +362,32 @@ public class JSONConfig {
      * @param allowedSpecialCharacters The list of special characters to be allowed
      */
     public void setAllowedSpecialCharacters(char[] allowedSpecialCharacters) {
-        this.allowedSpecialCharacters = allowedSpecialCharacters;
-        this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+        writeLock.lock();
+        try {
+            this.allowedSpecialCharacters = allowedSpecialCharacters.clone();
+            this.pathPattern = GeneralUtils.generatePathPattern(pathSeparator, allowedSpecialCharacters);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Adds a character to the allowed special characters list
+     *
+     * @param charToAdd The character to add to the allowed special characters list
+     */
+    public void addAllowedSpecialCharacter(char charToAdd) {
+        writeLock.lock();
+        try {
+            for (char c : allowedSpecialCharacters) {
+                if (c == charToAdd) return;
+            }
+            char[] newArray = Arrays.copyOf(allowedSpecialCharacters, allowedSpecialCharacters.length + 1);
+            newArray[newArray.length - 1] = charToAdd;
+            this.allowedSpecialCharacters = newArray;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -350,28 +407,32 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized Optional<JsonElement> getElement(JsonObject json, String path, boolean allowNull) {
-        Objects.requireNonNull(json);
-        if (path.isEmpty()) {
-            return Optional.of(json);
-        } else {
-            GeneralUtils.verifyPath(path, pathPattern);
-        }
-        String[] subpaths = splitPattern.split(path);
-        String subpath = subpaths[0];
-        if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
-            if (allowNull) {
-                return Optional.of(JsonNull.INSTANCE);
-            }
-            return Optional.empty();
-        } else if (json.get(subpath).isJsonObject()) {
-            if (subpaths.length == 1 && subpaths[0].isEmpty()) {
+    public Optional<JsonElement> getElement(JsonObject json, String path, boolean allowNull) {
+        readLock.lock();
+        try {
+            Objects.requireNonNull(json);
+            if (path.isEmpty()) {
                 return Optional.of(json);
+            } else {
+                GeneralUtils.verifyPath(path, pathPattern);
             }
-            return getElement(json.get(subpath).getAsJsonObject(),
-                    Arrays.stream(subpaths).skip(1).collect(Collectors.joining(String.valueOf(pathSeparator))));
-        } else {
-            return Optional.of(json.get(subpath));
+            String[] subpaths = splitPattern.split(path);
+            String subpath = subpaths[0];
+            if (json.get(subpath) == null || json.get(subpath).isJsonNull()) {
+                if (allowNull) {
+                    return Optional.of(JsonNull.INSTANCE);
+                }
+                return Optional.empty();
+            } else if (json.get(subpath).isJsonObject()) {
+                if (subpaths.length == 1 && subpaths[0].isEmpty()) {
+                    return Optional.of(json);
+                }
+                return getElement(json.get(subpath).getAsJsonObject(), Arrays.stream(subpaths).skip(1).collect(Collectors.joining(String.valueOf(pathSeparator))));
+            } else {
+                return Optional.of(json.get(subpath));
+            }
+        } finally {
+            readLock.unlock();
         }
     }
 
@@ -391,7 +452,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized Optional<JsonElement> getElement(JsonObject json, String path) {
+    public Optional<JsonElement> getElement(JsonObject json, String path) {
         return getElement(json, path, false);
     }
 
@@ -406,7 +467,7 @@ public class JSONConfig {
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    public synchronized Optional<JsonElement> getElement(String path) {
+    public Optional<JsonElement> getElement(String path) {
         return getElement(this.object, path);
     }
 
@@ -421,34 +482,38 @@ public class JSONConfig {
      * @throws NullPointerException     if the path is null
      * @since 2.0
      */
-    public synchronized void set(String path, Object object) {
-
-        JsonObject json = this.object;
-        JsonObject root = json;
-        if (path.isEmpty()) {
-            root = GSON.toJsonTree(object).getAsJsonObject();
-        } else {
-            GeneralUtils.verifyPath(path, pathPattern);
-        }
-        String[] subpaths = splitPattern.split(path);
-        for (int j = 0; j < subpaths.length; j++) {
-            if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
-                root.add(subpaths[j], new JsonObject());
-                if (j == subpaths.length - 1) {
-                    root.add(subpaths[j], GSON.toJsonTree(object));
-                } else {
-                    root = root.get(subpaths[j]).getAsJsonObject();
-                }
+    public void set(String path, Object object) {
+        writeLock.lock();
+        try {
+            JsonObject json = this.object;
+            JsonObject root = json;
+            if (path.isEmpty()) {
+                root = GSON.toJsonTree(object).getAsJsonObject();
             } else {
-                if (j == subpaths.length - 1) {
-                    root.add(subpaths[j], GSON.toJsonTree(object));
+                GeneralUtils.verifyPath(path, pathPattern);
+            }
+            String[] subpaths = splitPattern.split(path);
+            for (int j = 0; j < subpaths.length; j++) {
+                if (root.get(subpaths[j]) == null || root.get(subpaths[j]).isJsonNull()) {
+                    root.add(subpaths[j], new JsonObject());
+                    if (j == subpaths.length - 1) {
+                        root.add(subpaths[j], GSON.toJsonTree(object));
+                    } else {
+                        root = root.get(subpaths[j]).getAsJsonObject();
+                    }
                 } else {
-                    root = root.get(subpaths[j]).getAsJsonObject();
+                    if (j == subpaths.length - 1) {
+                        root.add(subpaths[j], GSON.toJsonTree(object));
+                    } else {
+                        root = root.get(subpaths[j]).getAsJsonObject();
+                    }
+                }
+                if (j == subpaths.length - 1) {
+                    root = json;
                 }
             }
-            if (j == subpaths.length - 1) {
-                root = json;
-            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -460,19 +525,25 @@ public class JSONConfig {
      * @throws IllegalStateException if the parent of the specified path is not an object
      */
     public void remove(String path) {
-        String[] paths = splitPattern.split(path);
-        if (!getElement(path).isPresent()) {
-            throw new IllegalStateException("Element not present!");
-        }
-        if (paths.length == 1) {
-            getObject().remove(path);
-        } else {
-            Optional<JSONConfig> subConfig = getSubConfig(path.substring(0, path.lastIndexOf(pathSeparator)));
-            if (subConfig.isPresent()) {
-                subConfig.get().remove(path.substring(path.lastIndexOf(pathSeparator) + 1, path.length()));
-            } else {
-                throw new IllegalStateException("Parent of path specified is not an object!");
+        writeLock.lock();
+        try {
+            String[] paths = splitPattern.split(path);
+            if (!getElement(path).isPresent()) {
+                throw new IllegalStateException("Element not present!");
             }
+            if (paths.length == 1) {
+                object.remove(path);
+            } else {
+                Optional<JSONConfig> subConfig = getSubConfig(path.substring(0, path.lastIndexOf(pathSeparator)));
+                if (subConfig.isPresent()) {
+                    subConfig.get().remove(path.substring(path.lastIndexOf(pathSeparator) + 1, path.length()));
+                    subConfig = subConfig;
+                } else {
+                    throw new IllegalStateException("Parent of path specified is not an object!");
+                }
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -488,7 +559,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
-    public synchronized Optional<String> getString(String path) {
+    public Optional<String> getString(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
@@ -511,7 +582,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.1
      */
-    public synchronized OptionalInt getInteger(String path) {
+    public OptionalInt getInteger(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalInt.empty();
@@ -534,7 +605,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public synchronized OptionalDouble getDouble(String path) {
+    public OptionalDouble getDouble(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalDouble.empty();
@@ -557,7 +628,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public synchronized OptionalLong getLong(String path) {
+    public OptionalLong getLong(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return OptionalLong.empty();
@@ -580,7 +651,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.2
      */
-    public synchronized Optional<Boolean> getBoolean(String path) {
+    public Optional<Boolean> getBoolean(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
@@ -603,7 +674,7 @@ public class JSONConfig {
      * @see JSONConfig#getElement(String)
      * @since 2.5
      */
-    public synchronized Optional<JsonArray> getArray(String path) {
+    public Optional<JsonArray> getArray(String path) {
         GeneralUtils.verifyPath(path, pathPattern);
         if (!getElement(path).isPresent()) {
             return Optional.empty();
@@ -623,28 +694,37 @@ public class JSONConfig {
      * @return A {@link LinkedHashSet} containing all the keys. If the config is empty
      * then so will this list be
      */
-    public synchronized Set<String> getKeys(boolean deep) {
+    public Set<String> getKeys(boolean deep) {
         Set<String> set = new LinkedHashSet<>();
         mapChildrenKeys(set, deep);
         return set;
     }
 
-    protected synchronized void mapChildrenKeys(Set<String> output, boolean deep) {
-        for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
-            output.add(entry.getKey());
-            if (entry.getValue().isJsonObject() && deep) {
-                mapChildrenKeys(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+    protected void mapChildrenKeys(Set<String> output, boolean deep) {
+        readLock.lock();
+        try {
+            for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
+                output.add(entry.getKey());
+                if (entry.getValue().isJsonObject() && deep) {
+                    mapChildrenKeys(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+                }
             }
+        } finally {
+            readLock.unlock();
         }
     }
 
-    protected synchronized void mapChildrenKeys(String prefix, Set<String> output,
-                                                JsonObject jsonObject, boolean deep) {
-        for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            output.add(prefix + pathSeparator + entry.getKey());
-            if (entry.getValue().isJsonObject() && deep) {
-                mapChildrenKeys(prefix + pathSeparator + entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+    protected void mapChildrenKeys(String prefix, Set<String> output, JsonObject jsonObject, boolean deep) {
+        readLock.lock();
+        try {
+            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+                output.add(prefix + pathSeparator + entry.getKey());
+                if (entry.getValue().isJsonObject() && deep) {
+                    mapChildrenKeys(prefix + pathSeparator + entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+                }
             }
+        } finally {
+            readLock.unlock();
         }
     }
 
@@ -657,23 +737,27 @@ public class JSONConfig {
      * @return A {@link LinkedHashMap} containing all the keys and values. If the config is empty
      * then so will this list be
      */
-    public synchronized Map<String, Object> getValues(boolean deep) {
+    public Map<String, Object> getValues(boolean deep) {
         Map<String, Object> map = new LinkedHashMap<>();
         mapChildrenValues(map, deep);
         return map;
     }
 
-    protected synchronized void mapChildrenValues(Map<String, Object> output, boolean deep) {
-        for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
-            output.put(entry.getKey(), entry.getValue());
-            if (entry.getValue().isJsonObject() && deep) {
-                mapChildrenValues(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+    protected void mapChildrenValues(Map<String, Object> output, boolean deep) {
+        readLock.lock();
+        try {
+            for (Map.Entry<String, JsonElement> entry : this.object.entrySet()) {
+                output.put(entry.getKey(), entry.getValue());
+                if (entry.getValue().isJsonObject() && deep) {
+                    mapChildrenValues(entry.getKey(), output, entry.getValue().getAsJsonObject(), deep);
+                }
             }
+        } finally {
+            readLock.unlock();
         }
     }
 
-    protected synchronized void mapChildrenValues(String prefix, Map<String, Object> output,
-                                                  JsonObject jsonObject, boolean deep) {
+    protected void mapChildrenValues(String prefix, Map<String, Object> output, JsonObject jsonObject, boolean deep) {
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             output.put(prefix + pathSeparator + entry.getKey(), entry.getValue());
             if (entry.getValue().isJsonObject() && deep) {
@@ -684,7 +768,12 @@ public class JSONConfig {
 
     @Override
     public String toString() {
-        return object.toString();
+        readLock.lock();
+        try {
+            return object.toString();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -694,20 +783,30 @@ public class JSONConfig {
      * @throws IllegalStateException         If somehow the mode is invalid
      * @throws FileNotFoundException         If the config file was moved/removed
      */
-    public void reload() throws UnsupportedOperationException, IllegalStateException, FileNotFoundException {
-        if (mode == -1) {
-            throw new UnsupportedOperationException("Cannot reload from a JsonObject");
-        } else if (mode == 0) {
-            File file = (File) this.file;
-            this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
-        } else if (mode == 1) {
-            String fileName = (String) this.file;
-            this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
-        } else if (mode == 2) {
-            InputStream stream = (InputStream) this.file;
-            this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
-        } else {
-            throw new IllegalStateException("Invalid Mode");
+    public void reload() throws FileNotFoundException {
+        writeLock.lock();
+        try {
+            switch (mode) {
+                case FILE:
+                    File file = (File) this.file;
+                    this.object = GSON.fromJson(new JsonReader(new FileReader(file)), JsonObject.class);
+                    break;
+                case FILE_NAME:
+                    String fileName = (String) this.file;
+                    this.object = GSON.fromJson(new JsonReader(new FileReader(fileName)), JsonObject.class);
+                    break;
+                case INPUT_STREAM:
+                    InputStream stream = (InputStream) this.file;
+                    this.object = GSON.fromJson(new JsonReader(new InputStreamReader(stream)), JsonObject.class);
+                    break;
+                case JSON_OBJECT:
+                    throw new UnsupportedOperationException("Cannot reload from a JsonObject");
+                default:
+                    throw new IllegalStateException("Invalid mode");
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
+
 }

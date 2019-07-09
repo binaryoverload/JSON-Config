@@ -128,7 +128,7 @@ public class JSONConfigTest {
     @Test
     public void testGetLongPositive() {
         assertTrue(config.getLong("date").isPresent());
-        assertTrue(config.getLong("date").getAsLong() == 10247893L);
+        assertEquals(10247893L, config.getLong("date").getAsLong());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -194,7 +194,7 @@ public class JSONConfigTest {
     public void testRemovePositive() throws UnsupportedEncodingException {
         String object = config.getObject().toString();
         config.remove("items.properties.id");
-        assertTrue(!config.getElement("items.properties.id").isPresent());
+        assertFalse(config.getElement("items.properties.id").isPresent());
         config = new JSONConfig(new ByteArrayInputStream(object.getBytes("UTF-8")));
     }
 
