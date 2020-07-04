@@ -29,7 +29,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
-import java.awt.PageAttributes
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
@@ -43,13 +42,11 @@ import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 import java.util.Objects
 import java.util.Optional
-import java.util.OptionalDouble
-import java.util.OptionalInt
-import java.util.OptionalLong
-import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.regex.Pattern
 import java.util.stream.Collectors
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 
 /**
@@ -59,15 +56,29 @@ import java.util.stream.Collectors
  * @author BinaryOverload
  * @since 1.0
  */
-open class JSONConfig {
+open class JSONConfig private constructor(val mode: MediaType) {
 
-    private var mode: MediaType? = null
+    @Transient
+    private val configLock: ReentrantReadWriteLock = ReentrantReadWriteLock()
+
+    var pathSeparator = '.'
+        get() = configLock.read { field }
+        set(sep) {
+            configLock.write {
+                for (allowedChar in allowedSpecialCharacters) {
+                    require(allowedChar != pathSeparator) { "Cannot set path separator to an allowed special character!" }
+                }
+                field = sep
+
+                // Recompile the pattern on a new path separator.
+                pathPattern = generatePathPattern(pathSeparator, allowedSpecialCharacters)
+                splitPattern = Pattern.compile(Pattern.quote(pathSeparator.toString()))
+            }
+        }
+
+    private var allowedSpecialCharacters = mutableSetOf('-', '+', '_', '$')
+        private set
     private var file: Any? = null
-    private var pathSeparator = '.'
-    private var allowedSpecialCharacters = charArrayOf('-', '+', '_', '$')
-    private val configLock: ReadWriteLock = ReentrantReadWriteLock()
-    private val readLock = configLock.readLock()
-    private val writeLock = configLock.writeLock()
     private var pathPattern = generatePathPattern(pathSeparator, allowedSpecialCharacters)
     private var splitPattern = Pattern.compile(Pattern.quote(pathSeparator.toString()))
 
@@ -88,11 +99,10 @@ open class JSONConfig {
      *
      * @since 1.0
      */
-    constructor(file: File) : this() {
+    constructor(file: File) : this(MediaType.FILE) {
         Objects.requireNonNull(file)
-        this.internalObject = GSON.fromJson(JsonReader(FileReader(file)), JsonObject::class.java)
-        Objects.requireNonNull(this.internalObject, "Input is empty!")
-        mode = MediaType.FILE
+        this._internalObject = GSON.fromJson(JsonReader(FileReader(file)), JsonObject::class.java)
+        Objects.requireNonNull(this._internalObject, "Input is empty!")
         this.file = file
     }
 
@@ -112,12 +122,11 @@ open class JSONConfig {
      *
      * @since 1.0
      */
-    constructor(fileName: String) : this() {
+    constructor(fileName: String) : this(MediaType.FILE_NAME) {
         Objects.requireNonNull(fileName)
         require(fileName.isNotEmpty())
-        mode = MediaType.FILE_NAME
-        this.internalObject = GSON.fromJson(JsonReader(FileReader(fileName)), JsonObject::class.java)
-        Objects.requireNonNull(this.internalObject, "Input is empty!")
+        this._internalObject = GSON.fromJson(JsonReader(FileReader(fileName)), JsonObject::class.java)
+        Objects.requireNonNull(this._internalObject, "Input is empty!")
         file = fileName
     }
 
@@ -143,12 +152,11 @@ open class JSONConfig {
      *
      * @since 1.0
      */
-    constructor(file: File, pathSeparator: Char, allowedSpecialChars: CharArray) : this(allowedSpecialChars) {
+    constructor(file: File, pathSeparator: Char, allowedSpecialChars: MutableSet<Char>) : this(MediaType.FILE) {
         Objects.requireNonNull(file)
-        this.internalObject = GSON.fromJson(JsonReader(FileReader(file)), JsonObject::class.java)
-        Objects.requireNonNull(this.internalObject, "Input is empty!")
-        setPathSeparator(pathSeparator)
-        mode = MediaType.FILE
+        this._internalObject = GSON.fromJson(JsonReader(FileReader(file)), JsonObject::class.java)
+        Objects.requireNonNull(this._internalObject, "Input is empty!")
+        this.pathSeparator = pathSeparator
         this.file = file
     }
 
@@ -161,11 +169,10 @@ open class JSONConfig {
      *
      * @since 1.0
      */
-    constructor(stream: InputStream) : this() {
+    constructor(stream: InputStream) : this(MediaType.INPUT_STREAM) {
         Objects.requireNonNull(stream)
-        this.internalObject = GSON.fromJson(JsonReader(InputStreamReader(stream)), JsonObject::class.java)
-        Objects.requireNonNull(this.internalObject, "Input is empty!")
-        mode = MediaType.INPUT_STREAM
+        this._internalObject = GSON.fromJson(JsonReader(InputStreamReader(stream)), JsonObject::class.java)
+        Objects.requireNonNull(this._internalObject, "Input is empty!")
         file = stream
     }
 
@@ -184,29 +191,14 @@ open class JSONConfig {
      *
      * @since 1.0
      */
-    constructor(stream: InputStream, pathSeparator: Char, allowedSpecialChars: CharArray) : this(allowedSpecialChars) {
+    constructor(stream: InputStream, pathSeparator: Char, allowedSpecialChars: MutableSet<Char>) : this(MediaType.INPUT_STREAM) {
         Objects.requireNonNull(stream)
-        setPathSeparator(pathSeparator)
-        val br = BufferedReader(InputStreamReader(stream))
-        this.internalObject = GSON.fromJson(br.lines().collect(Collectors.joining()), JsonObject::class.java)
-        br.close()
-        Objects.requireNonNull(this.internalObject, "Input is empty!")
-        mode = MediaType.INPUT_STREAM
+        this.pathSeparator = pathSeparator
+        BufferedReader(InputStreamReader(stream)).useLines {
+            this._internalObject = GSON.fromJson(it.joinToString(), JsonObject::class.java)
+        }
+        Objects.requireNonNull(this._internalObject, "Input is empty!")
         file = stream
-    }
-
-    /**
-     * Basic constructor that directly sets the JSONObject
-     *
-     * @param internalObject The object to assign to the config *Cannot be null*
-     * @throws NullPointerException if the object is null
-     * @see JsonObject
-     *
-     * @since 1.0
-     */
-    constructor(internalObject: JsonObject) : this() {
-        this.internalObject = internalObject
-        mode = MediaType.JSON_OBJECT
     }
 
     /**
@@ -221,83 +213,27 @@ open class JSONConfig {
      * @throws IllegalArgumentException if the path separator is empty or not a length of 1
      * @since 1.0
      */
-    constructor(internalObject: JsonObject, pathSeparator: Char, allowedSpecialChars: CharArray) : this(allowedSpecialChars) {
-        this.internalObject = internalObject
-        setPathSeparator(pathSeparator)
-        mode = MediaType.JSON_OBJECT
+    constructor(internalObject: JsonObject, pathSeparator: Char, allowedSpecialChars: MutableSet<Char>) : this(MediaType.JSON_OBJECT) {
+        this._internalObject = internalObject
+        this.pathSeparator = pathSeparator
+        this.allowedSpecialCharacters = this.allowedSpecialCharacters.union(allowedSpecialChars).toMutableSet()
     }
 
-    private constructor(allowedSpecialCharacters: CharArray) {
-        this.allowedSpecialCharacters = allowedSpecialCharacters
-    }
+    public constructor() : this(MediaType.JSON_OBJECT)
 
-    private constructor() {}
-
-    /**
-     * Gets the path separator for this config
-     *
-     * @return The path separator
-     * @since 1.0
-     */
-    fun getPathSeparator(): Char {
-        return pathSeparator
-    }
-
-    /**
-     * Sets the path separator for this config
-     *
-     * @param pathSeparator The path separator to be set *Cannot be null, empty or any length
-     * other than 1*
-     * @throws NullPointerException     if the path separator provided is null
-     * @throws IllegalArgumentException if the path separator is empty of any length other than 1
-     * @since 1.0
-     */
-    fun setPathSeparator(pathSeparator: Char) {
-        writeLock.lock()
-        try {
-            this.pathSeparator = pathSeparator
-            for (allowedChar in allowedSpecialCharacters) {
-                require(allowedChar != pathSeparator) { "Cannot set path separator to an allowed special character!" }
-            }
-
-            // Recompile the pattern on a new path separator.
-            pathPattern = generatePathPattern(pathSeparator, allowedSpecialCharacters)
-            splitPattern = Pattern.compile(Pattern.quote(pathSeparator.toString()))
-        } finally {
-            writeLock.unlock()
-        }
-    }
-
-    /**
-     * Gets the JSON object associated with this config
-     *
-     * @return The JSON Object associated with this config
-     * @since 1.0
-     */
-    /**
-     * Sets the JSON object for this config
-     *
-     * @param object The object to be set *Cannot be null*
-     * @throws NullPointerException if the object is null
-     * @since 1.0
-     */
-    var internalObject: JsonObject
+    private var _internalObject: JsonObject = JsonObject()
         get() {
-            readLock.lock()
-            return try {
-                field.deepCopy()
-            } finally {
-                readLock.unlock()
+            return configLock.read {
+                field
             }
         }
         set(obj) {
-            writeLock.lock()
-            try {
+            configLock.write {
                 field = obj
-            } finally {
-                writeLock.unlock()
             }
         }
+
+    fun getInternalObject(): JsonObject = _internalObject.deepCopy()
 
     /**
      * Returns a new config with its root object set to the object
@@ -311,9 +247,7 @@ open class JSONConfig {
      * @since 2.3
      */
     fun getSubConfig(path: String): JSONConfig? {
-        Objects.requireNonNull(path)
-        readLock.lock()
-        return try {
+        return configLock.read {
             val element = getElement(path)
             if (element == null) {
                 null
@@ -322,37 +256,6 @@ open class JSONConfig {
             } else {
                 JSONConfig(element.asJsonObject, pathSeparator, allowedSpecialCharacters)
             }
-        } finally {
-            readLock.unlock()
-        }
-    }
-
-    /**
-     * Gets the list of chars that are allowed in a path
-     *
-     * @return List of allowed special characters
-     */
-    fun getAllowedSpecialCharacters(): CharArray {
-        readLock.lock()
-        return try {
-            allowedSpecialCharacters.clone()
-        } finally {
-            readLock.unlock()
-        }
-    }
-
-    /**
-     * Sets the list of special characters allowed
-     *
-     * @param allowedSpecialCharacters The list of special characters to be allowed
-     */
-    fun setAllowedSpecialCharacters(allowedSpecialCharacters: CharArray) {
-        writeLock.lock()
-        try {
-            this.allowedSpecialCharacters = allowedSpecialCharacters.clone()
-            pathPattern = generatePathPattern(pathSeparator, allowedSpecialCharacters)
-        } finally {
-            writeLock.unlock()
         }
     }
 
@@ -362,16 +265,14 @@ open class JSONConfig {
      * @param charToAdd The character to add to the allowed special characters list
      */
     fun addAllowedSpecialCharacter(charToAdd: Char) {
-        writeLock.lock()
-        try {
-            for (c in allowedSpecialCharacters) {
-                if (c == charToAdd) return
-            }
-            val newArray = allowedSpecialCharacters.copyOf(allowedSpecialCharacters.size + 1)
-            newArray[newArray.size - 1] = charToAdd
-            allowedSpecialCharacters = newArray
-        } finally {
-            writeLock.unlock()
+        configLock.write {
+            allowedSpecialCharacters.add(charToAdd)
+        }
+    }
+
+    fun removeAllowedSpecialCharacter(charToRemove: Char): Boolean {
+        return configLock.write {
+            allowedSpecialCharacters.remove(charToRemove)
         }
     }
 
@@ -394,8 +295,7 @@ open class JSONConfig {
      * @since 2.0
      */
     fun getElement(json: JsonObject, path: String, allowNull: Boolean): JsonElement? {
-        readLock.lock()
-        try {
+        configLock.read {
             if (path.isEmpty()) {
                 return json
             } else {
@@ -416,8 +316,6 @@ open class JSONConfig {
             } else {
                 json[subpath]
             }
-        } finally {
-            readLock.unlock()
         }
     }
 
@@ -454,7 +352,7 @@ open class JSONConfig {
      * @since 2.0
      */
     fun getElement(path: String): JsonElement? {
-        return getElement(this.internalObject, path)
+        return getElement(this._internalObject, path)
     }
 
     /**
@@ -463,18 +361,17 @@ open class JSONConfig {
      * @param path   The path to get the element from. If this is blank,
      * it sets the root object. If the path is malformed,
      * then it throws an [IllegalArgumentException]
-     * @param object The object to set at the specified path
+     * @param `object` The object to set at the specified path
      * @throws IllegalArgumentException if the path is malformed
      * @throws NullPointerException     if the path is null
      * @since 2.0
      */
-    operator fun set(path: String, `object`: Any?) {
-        writeLock.lock()
-        try {
-            val json: JsonObject = this.internalObject
+    operator fun set(path: String, obj: Any?) {
+        configLock.write {
+            val json: JsonObject = this._internalObject
             var root = json
             if (path.isEmpty()) {
-                root = GSON.toJsonTree(`object`).asJsonObject
+                root = GSON.toJsonTree(obj).asJsonObject
             } else {
                 verifyPath(path, pathPattern)
             }
@@ -483,13 +380,13 @@ open class JSONConfig {
                 if (root[subpaths[j]] == null || root[subpaths[j]].isJsonNull) {
                     root.add(subpaths[j], JsonObject())
                     if (j == subpaths.size - 1) {
-                        root.add(subpaths[j], JSONConfig.Companion.GSON.toJsonTree(`object`))
+                        root.add(subpaths[j], GSON.toJsonTree(obj))
                     } else {
                         root = root[subpaths[j]].asJsonObject
                     }
                 } else {
                     if (j == subpaths.size - 1) {
-                        root.add(subpaths[j], JSONConfig.Companion.GSON.toJsonTree(`object`))
+                        root.add(subpaths[j], GSON.toJsonTree(obj))
                     } else {
                         root = root[subpaths[j]].asJsonObject
                     }
@@ -498,8 +395,6 @@ open class JSONConfig {
                     root = json
                 }
             }
-        } finally {
-            writeLock.unlock()
         }
     }
 
@@ -511,12 +406,11 @@ open class JSONConfig {
      * @throws IllegalStateException if the parent of the specified path is not an object
      */
     fun remove(path: String) {
-        writeLock.lock()
-        try {
+        configLock.write {
             val paths = splitPattern.split(path)
             check(getElement(path) != null) { "Element not present!" }
             if (paths.size == 1) {
-                internalObject.remove(path)
+                _internalObject.remove(path)
             } else {
                 val subConfig = getSubConfig(path.substring(0, path.lastIndexOf(pathSeparator)))
                 if (subConfig != null) {
@@ -525,8 +419,6 @@ open class JSONConfig {
                     throw IllegalStateException("Parent of path specified is not an object!")
                 }
             }
-        } finally {
-            writeLock.unlock()
         }
     }
 
@@ -688,30 +580,24 @@ open class JSONConfig {
     }
 
     protected fun mapChildrenKeys(output: MutableSet<String>, deep: Boolean) {
-        readLock.lock()
-        try {
-            for ((key, value) in this.internalObject.entrySet()) {
+        configLock.read {
+            for ((key, value) in this._internalObject.entrySet()) {
                 output.add(key)
                 if (value.isJsonObject && deep) {
                     mapChildrenKeys(key, output, value.asJsonObject, deep)
                 }
             }
-        } finally {
-            readLock.unlock()
         }
     }
 
     protected fun mapChildrenKeys(prefix: String, output: MutableSet<String>, jsonObject: JsonObject, deep: Boolean) {
-        readLock.lock()
-        try {
+        configLock.read {
             for ((key, value) in jsonObject.entrySet()) {
                 output.add(prefix + pathSeparator + key)
                 if (value.isJsonObject && deep) {
                     mapChildrenKeys(prefix + pathSeparator + key, output, value.asJsonObject, deep)
                 }
             }
-        } finally {
-            readLock.unlock()
         }
     }
 
@@ -731,16 +617,13 @@ open class JSONConfig {
     }
 
     protected fun mapChildrenValues(output: MutableMap<String, Any>, deep: Boolean) {
-        readLock.lock()
-        try {
-            for ((key, value) in this.internalObject.entrySet()) {
+        configLock.read {
+            for ((key, value) in this._internalObject.entrySet()) {
                 output[key] = value
                 if (value.isJsonObject && deep) {
                     mapChildrenValues(key, output, value.asJsonObject, deep)
                 }
             }
-        } finally {
-            readLock.unlock()
         }
     }
 
@@ -753,14 +636,7 @@ open class JSONConfig {
         }
     }
 
-    override fun toString(): String {
-        readLock.lock()
-        return try {
-            internalObject.toString()
-        } finally {
-            readLock.unlock()
-        }
-    }
+    override fun toString(): String = configLock.read { _internalObject.toString() }
 
     /**
      * Reloads the config.
@@ -771,29 +647,25 @@ open class JSONConfig {
      */
     @Throws(FileNotFoundException::class)
     fun reload() {
-        writeLock.lock()
-        try {
+        configLock.write {
             when (mode) {
                 MediaType.FILE -> {
-                    val file = file as File?
-                    this.internalObject = JSONConfig.Companion.GSON.fromJson<JsonObject>(JsonReader(FileReader(file)), JsonObject::class.java)
+                    val file = file as File
+                    this._internalObject = GSON.fromJson(JsonReader(FileReader(file)), JsonObject::class.java)
                 }
 
                 MediaType.FILE_NAME -> {
-                    val fileName = file as String?
-                    this.internalObject = JSONConfig.Companion.GSON.fromJson<JsonObject>(JsonReader(FileReader(fileName)), JsonObject::class.java)
+                    val fileName = file as String
+                    this._internalObject = GSON.fromJson(JsonReader(FileReader(fileName)), JsonObject::class.java)
                 }
 
                 MediaType.INPUT_STREAM -> {
-                    val stream = file as InputStream?
-                    this.internalObject = JSONConfig.Companion.GSON.fromJson<JsonObject>(JsonReader(InputStreamReader(stream)), JsonObject::class.java)
+                    val stream = file as InputStream
+                    this._internalObject = GSON.fromJson(JsonReader(InputStreamReader(stream)), JsonObject::class.java)
                 }
 
                 MediaType.JSON_OBJECT -> throw UnsupportedOperationException("Cannot reload from a JsonObject")
-                else -> throw IllegalStateException("Invalid mode")
             }
-        } finally {
-            writeLock.unlock()
         }
     }
 

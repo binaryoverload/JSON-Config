@@ -66,7 +66,7 @@ fun verifyPath(path: String, pattern: Pattern) {
  * @throws IllegalArgumentException if the path supplied is malformed
  * @since 2.1
  */
-fun verifyPath(path: String, ps: Char, allowedSpecialChars: CharArray) {
+fun verifyPath(path: String, ps: Char, allowedSpecialChars: Set<Char>) {
     Objects.requireNonNull(path)
     require(verifyNoConflict(ps, allowedSpecialChars)) { "The allowedSpecialChars array contains the path separator!" }
     val matcher = generatePathPattern(ps, allowedSpecialChars).matcher(path)
@@ -83,11 +83,11 @@ fun verifyPath(path: String, ps: Char, allowedSpecialChars: CharArray) {
  * (in this case path separator).
  *
  * @param c      The char to check for.
- * @param cArray The array to iterate through.
+ * @param cList The array to iterate through.
  * @return True if the char is not in the array, false otherwise.
  */
-fun verifyNoConflict(c: Char, cArray: CharArray): Boolean {
-    for (cc in cArray) if (c == cc) return false
+fun verifyNoConflict(c: Char, cList: Set<Char>): Boolean {
+    for (cc in cList) if (c == cc) return false
     return true
 }
 
@@ -106,7 +106,7 @@ fun escapeRegex(s: String?): String? {
  * @return The compiled Pattern used for checking a valid path with the specified pathSeperator and
  * allowedSpecialCharacters.
  */
-fun generatePathPattern(pathSeparator: Char, allowedSpecialCharacters: CharArray?): Pattern {
-    val allowed = String(allowedSpecialCharacters!!)
+fun generatePathPattern(pathSeparator: Char, allowedSpecialCharacters: Set<Char>): Pattern {
+    val allowed = allowedSpecialCharacters.joinToString()
     return Pattern.compile(String.format("([\\w%s]+[%s]?)+([\\w%s]+)*", allowed, pathSeparator, allowed))
 }

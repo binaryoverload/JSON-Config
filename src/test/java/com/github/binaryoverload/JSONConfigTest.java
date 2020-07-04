@@ -22,18 +22,28 @@
  * SOFTWARE.
  */
 
-package io.github.binaryoverload;
+package com.github.binaryoverload;
 
 import com.google.gson.JsonObject;
-import java.io.*;
-import java.net.URISyntaxException;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class JSONConfigTest {
@@ -42,21 +52,21 @@ public class JSONConfigTest {
 
     @Test
     public void testSubConfigPositive() {
-        assertTrue(config.getSubConfig("items").isPresent());
-        assertTrue(config.getSubConfig("items").get().getString("title").get().equals("Product"));
+        assertNotNull(config.getSubConfig("items"));
+        assertEquals("Product", config.getSubConfig("items").getString("title"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testSubConfigNegative() {
-        assertFalse(config.getSubConfig("blad.djh.dsjh").isPresent());
+        assertNull(config.getSubConfig("blad.djh.dsjh"));
         config.getSubConfig("title");
     }
 
     @Test
     public void testSetPositive() {
         config.set("title", "Hi there");
-        assertTrue(config.getElement("title").isPresent());
-        assertTrue(config.getElement("title").get().getAsString().equalsIgnoreCase("Hi there"));
+        assertNotNull(config.getElement("title"));
+        assertTrue(config.getElement("title").getAsString().equalsIgnoreCase("Hi there"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -66,21 +76,21 @@ public class JSONConfigTest {
 
     @Test
     public void testGetPositive() {
-        assertTrue(config.getElement("type").isPresent());
-        assertTrue(config.getElement("type").get().getAsJsonPrimitive().isString());
-        assertTrue(config.getElement("type").get().getAsString().equalsIgnoreCase("array"));
+        assertNotNull(config.getElement("type"));
+        assertTrue(config.getElement("type").getAsJsonPrimitive().isString());
+        assertTrue(config.getElement("type").getAsString().equalsIgnoreCase("array"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetNegative() {
-        assertFalse(config.getElement("blah").isPresent());
+        assertNull(config.getElement("blah"));
         config.getElement("blah...");
     }
 
     @Test
     public void testGetEmpty() {
-        assertTrue(config.getElement("").isPresent());
-        assertTrue(config.getElement("").get().equals(config.getObject()));
+        assertNotNull(config.getElement(""));
+        assertEquals(config.getElement(""), config.getInternalObject());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -90,74 +100,74 @@ public class JSONConfigTest {
 
     @Test
     public void testGetStringPositive() {
-        assertTrue(config.getString("items.title").isPresent());
-        assertTrue(config.getString("items.title").get().equals("Product"));
+        assertNotNull(config.getString("items.title"));
+        assertEquals("Product", config.getString("items.title"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetStringNegative() {
-        assertFalse(config.getString("items.blah").isPresent());
+        assertNull(config.getString("items.blah"));
         config.getString("items");
     }
 
     @Test
     public void testGetIntegerPositive() {
-        assertTrue(config.getInteger("date").isPresent());
-        assertTrue(config.getInteger("date").getAsInt() == 10247893);
+        assertNotNull(config.getInteger("date"));
+        assertEquals(10247893, (int) config.getInteger("date"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetIntegerNegative() {
-        assertFalse(config.getInteger("blah").isPresent());
+        assertNull(config.getInteger("blah"));
         config.getInteger("title");
     }
 
 
     @Test
     public void testGetDoublePositive() {
-        assertTrue(config.getDouble("date").isPresent());
-        assertTrue(config.getDouble("date").getAsDouble() == 10247893D);
+        assertNotNull(config.getDouble("date"));
+        assertEquals(10247893D, config.getDouble("date"), 0.0);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetDoubleNegative() {
-        assertFalse(config.getDouble("blah").isPresent());
+        assertNull(config.getDouble("blah"));
         config.getDouble("title");
     }
 
     @Test
     public void testGetLongPositive() {
-        assertTrue(config.getLong("date").isPresent());
-        assertEquals(10247893L, config.getLong("date").getAsLong());
+        assertNotNull(config.getLong("date"));
+        assertEquals(10247893L, config.getLong("date").longValue());
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetLongNegative() {
-        assertFalse(config.getLong("blah").isPresent());
+        assertNull(config.getLong("blah"));
         config.getLong("title");
     }
 
     @Test
     public void testGetBooleanPositive() {
-        assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").isPresent());
-        assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum").get());
+        assertNotNull(config.getBoolean("items.properties.price.exclusiveMinimum"));
+        assertTrue(config.getBoolean("items.properties.price.exclusiveMinimum"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetBooleanNegative() {
-        assertFalse(config.getBoolean("blah").isPresent());
+        assertNull(config.getBoolean("blah"));
         config.getBoolean("date");
     }
 
     @Test
     public void testGetArrayPositive() {
-        assertTrue(config.getArray("items.required").isPresent());
-        assertTrue(config.getArray("items.required").get().get(0).getAsString().equalsIgnoreCase("id"));
+        assertNotNull(config.getArray("items.required"));
+        assertTrue(config.getArray("items.required").get(0).getAsString().equalsIgnoreCase("id"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void testGetArrayNegative() {
-        assertFalse(config.getArray("items.properties.blah").isPresent());
+        assertNull(config.getArray("items.properties.blah"));
         config.getArray("items.properties");
     }
 
@@ -192,15 +202,15 @@ public class JSONConfigTest {
 
     @Test
     public void testRemovePositive() throws UnsupportedEncodingException {
-        String object = config.getObject().toString();
+        String object = config.getInternalObject().toString();
         config.remove("items.properties.id");
-        assertFalse(config.getElement("items.properties.id").isPresent());
-        config = new JSONConfig(new ByteArrayInputStream(object.getBytes("UTF-8")));
+        assertNull(config.getElement("items.properties.id"));
+        config = new JSONConfig(new ByteArrayInputStream(object.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testReloadUnsupported() throws FileNotFoundException {
-        JSONConfig config = new JSONConfig(new JsonObject());
+        JSONConfig config = new JSONConfig();
         config.reload();
     }
 
@@ -208,14 +218,14 @@ public class JSONConfigTest {
     public void testReloadFile() throws IOException, URISyntaxException {
         File file = new File(JSONConfig.class.getClassLoader().getResource("testfile.json").toURI());
         JSONConfig config = new JSONConfig(file);
-        assertEquals(config.getString("title").get(), "Product set");
+        assertEquals(config.getString("title"), "Product set");
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write("{\"title\":\"Product jet\",\"type\":\"array\",\"date\":10247893,\"items\":{\"title\":\"Product\",\"type\":\"object\"}}");
         }
 
         config.reload();
-        assertEquals(config.getString("title").get(), "Product jet");
+        assertEquals(config.getString("title"), "Product jet");
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write("{\"title\":\"Product set\",\"type\":\"array\",\"date\":10247893,\"items\":{\"title\":\"Product\",\"type\":\"object\"}}");
