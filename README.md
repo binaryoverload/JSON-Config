@@ -33,8 +33,8 @@ dependencies {
 public static void main(String[] args) {
     JSONConfig config = new JSONConfig("config.json");
     
-    if (config.getString("bot.token").isPresent())
-        init(config.getString("bot.token").get());
+    if (config.getString("bot.token") != null)
+        init(config.getString("bot.token"));
     else {
         throw new IllegalStateException("You need the token in order to start the bot!");
         System.exit(1);
