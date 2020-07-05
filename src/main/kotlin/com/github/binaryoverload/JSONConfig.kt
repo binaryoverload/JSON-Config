@@ -41,7 +41,6 @@ import java.util.Arrays
 import java.util.LinkedHashMap
 import java.util.LinkedHashSet
 import java.util.Objects
-import java.util.Optional
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -92,7 +91,6 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * is a directory rather than a regular file,
      * or for some other reason cannot be opened for
      * reading.
-     * @throws NullPointerException  if the passed variable is null
      * @see FileReader
      *
      * @see File
@@ -116,8 +114,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * is a directory rather than a regular file,
      * or for some other reason cannot be opened for
      * reading.
-     * @throws NullPointerException     if the passed variable is null
-     * @throws IllegalArgumentException if the file name is empty
+     * @throws IllegalArgumentException if the file name is empty.
      * @see FileReader
      *
      * @since 1.0
@@ -132,7 +129,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
 
     /**
      * Constructor for use with file-based applications and specification
-     * of a custom path separator
+     * of a custom path separator.
      *
      * @param file                The file must exist and not be a directory
      * @param pathSeparator       The separator to use for this config *This cannot be null, empty or
@@ -143,9 +140,8 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * is a directory rather than a regular file,
      * or for some other reason cannot be opened for
      * reading.
-     * @throws NullPointerException     if any of the passed variables are null
      * @throws IllegalArgumentException if the path separator is not empty or if it is any length
-     * other than 1
+     * other than 1.
      * @see FileInputStream
      *
      * @see File
@@ -164,7 +160,6 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * More advanced constructor allowing users to specify their own input stream
      *
      * @param stream The stream to be used for the JSON Object *This cannot be null*
-     * @throws NullPointerException if the stream is null
      * @see InputStream
      *
      * @since 1.0
@@ -184,9 +179,8 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * null, empty or any other lenth than 1*
      * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
      * with the path separator.
-     * @throws NullPointerException     if any of the passed arguments are null
-     * @throws IllegalArgumentException if the path separator is empty or not a length of 1
-     * @throws IOException              if the stream is invalid or malformatted
+     * @throws IllegalArgumentException if the path separator is empty or not a length of 1.
+     * @throws IOException              if the stream is invalid or malformatted.
      * @see InputStream
      *
      * @since 1.0
@@ -209,8 +203,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * other than 1*
      * @param allowedSpecialChars The allowed special characters which can be used on the path. This cannot conflict
      * with the path separator.
-     * @throws NullPointerException     if either of the passed arguments are null
-     * @throws IllegalArgumentException if the path separator is empty or not a length of 1
+     * @throws IllegalArgumentException if the path separator is empty or not a length of 1.
      * @since 1.0
      */
     constructor(internalObject: JsonObject, pathSeparator: Char, allowedSpecialChars: MutableSet<Char>) : this(MediaType.JSON_OBJECT) {
@@ -219,7 +212,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
         this.allowedSpecialCharacters = this.allowedSpecialCharacters.union(allowedSpecialChars).toMutableSet()
     }
 
-    public constructor() : this(MediaType.JSON_OBJECT)
+    constructor() : this(MediaType.JSON_OBJECT)
 
     private var _internalObject: JsonObject = JsonObject()
         get() {
@@ -233,17 +226,21 @@ open class JSONConfig private constructor(val mode: MediaType) {
             }
         }
 
-    fun getInternalObject(): JsonObject = _internalObject.deepCopy()
+    /**
+     * Returns a copy of the internal JsonObject for this configuration.
+     *
+     * @return The deep-copy of the internal JsonObject.
+     * @since 3.0
+     */
+    fun getInternalObject(): JsonObject = configLock.read { _internalObject.deepCopy() }
 
     /**
      * Returns a new config with its root object set to the object
      * retrieved from the specified path
      *
      * @param path The path to get the new config from *Cannot be null*
-     * @return The JSONConfig wrapped in an [Optional]. The optional is empty if the element
-     * at the path is non-existent
-     * @throws NullPointerException  if the path is null
-     * @throws IllegalStateException if the element at the path is not a JSON object
+     * @return The JSONConfig at the path. Returns null if there is not an element at the specified path.
+     * @throws IllegalStateException if the element at the path is not a JSON object.
      * @since 2.3
      */
     fun getSubConfig(path: String): JSONConfig? {
@@ -260,16 +257,27 @@ open class JSONConfig private constructor(val mode: MediaType) {
     }
 
     /**
-     * Adds a character to the allowed special characters list
+     * Adds a character to the allowed special characters set.
      *
-     * @param charToAdd The character to add to the allowed special characters list
+     * @param charToAdd The character to add.
+     * @return true if the character was added. false if the character was already present in the set.
+     * @see Set
+     * @since 3.0
      */
-    fun addAllowedSpecialCharacter(charToAdd: Char) {
-        configLock.write {
+    fun addAllowedSpecialCharacter(charToAdd: Char): Boolean {
+        return configLock.write {
             allowedSpecialCharacters.add(charToAdd)
         }
     }
 
+    /**
+     * Removes a character from the allowed specific characters set.
+     *
+     * @param charToRemove The character to remove.
+     * @return true if the character was removed. false if the character did not exist in the set.
+     * @since 3.0
+     * @see Set
+     */
     fun removeAllowedSpecialCharacter(charToRemove: Char): Boolean {
         return configLock.write {
             allowedSpecialCharacters.remove(charToRemove)
@@ -279,22 +287,16 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Method to get a JSON Element from a specified path
      *
-     *
-     * **It is not recommended to use this method! Use
-     * [com.github.binaryoverload.JSONConfig.getElement] instead!**
-     *
      * @param json      The object to search in
      * @param path      The path to get the element from. If this is blank,
      * it returns the entire object. If the path is malformed,
      * then it throws an [IllegalArgumentException]
      * @param allowNull Whether to allow null
-     * @return The element at the specified path *Returns an empty optional if the element
-     * doesn't exist*
-     * @throws NullPointerException     if the object specified is null
+     * @return The element at the specified path. Returns null if the element doesn't exist.
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
-    fun getElement(json: JsonObject, path: String, allowNull: Boolean): JsonElement? {
+    private fun getElement(json: JsonObject, path: String, allowNull: Boolean): JsonElement? {
         configLock.read {
             if (path.isEmpty()) {
                 return json
@@ -330,9 +332,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @param path The path to get the element from. If this is blank,
      * it returns the entire object. If the path is malformed,
      * then it throws an [IllegalArgumentException]
-     * @return The element at the specified path *Returns an empty optional if the element
-     * doesn't exist*
-     * @throws NullPointerException     if the object specified is null
+     * @return The element at the specified path. Returns null if the element doesn't exist.
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
@@ -346,8 +346,7 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @param path The path to get the element from. If this is blank,
      * it returns the entire object. If the path is malformed,
      * then it throws an [IllegalArgumentException]
-     * @return The element at the specified path *Returns an empty optional if the element
-     * doesn't exist*
+     * @return The element at the specified path. Returns null if the element doesn't exist.
      * @throws IllegalArgumentException if the path is malformed
      * @since 2.0
      */
@@ -363,7 +362,6 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * then it throws an [IllegalArgumentException]
      * @param `object` The object to set at the specified path
      * @throws IllegalArgumentException if the path is malformed
-     * @throws NullPointerException     if the path is null
      * @since 2.0
      */
     operator fun set(path: String, obj: Any?) {
@@ -425,22 +423,25 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a string at the specified path
      *
-     * @param path The path to get the string at *Must not be null*
-     * @return An optional containing the string value. If the value at the path does not exist
-     * optional is empty
-     * @throws NullPointerException     if the path is null
-     * @throws IllegalArgumentException if the path is malformed
-     * @throws IllegalStateException    if the element at the path is not a string
+     * @param path The path to get the string at.
+     * @param forceConversion Whether to forcefully convert the element to a string or not. If this is false, this
+     * method will return [IllegalStateException] for any element that isn't a JSON String.
+     * @return The string value. If the value at the path does not exist then this returns null.
+     * @throws IllegalArgumentException if the path is malformed.
+     * @throws IllegalStateException    if the element at the path is not a string.
      * @see JSONConfig.getElement
-     * @since 2.1
+     * @since 3.0
      */
-    fun getString(path: String): String? {
+    @JvmOverloads
+    fun getString(path: String, forceConversion: Boolean = false): String? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
             null
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isString) {
             element.asString
+        } else if (forceConversion) {
+            element.toString()
         } else {
             throw IllegalStateException("The element at the path is not a string")
         }
@@ -449,12 +450,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a integer at the specified path
      *
-     * @param path The path to get the integer at *Must not be null*
-     * @return An optional containing the integer value. If the value at the path does not exist
-     * then the optional is empty
-     * @throws NullPointerException     if the path is null
-     * @throws IllegalArgumentException if the path is malformed
-     * @throws IllegalStateException    if the element at the path is not a number
+     * @param path The path to get the integer at.
+     * @return The integer value at this path. If the value at the path does not exist
+     * then null is returned.
+     * @throws IllegalArgumentException if the path is malformed.
+     * @throws IllegalStateException    if the element at the path is not a number.
      * @see JSONConfig.getElement
      * @since 2.1
      */
@@ -473,12 +473,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a double at the specified path
      *
-     * @param path The path to get the double at *Must not*
-     * @return An optional containing the double value. If the value at the path does not exist
-     * then the optional is empty
-     * @throws NullPointerException     if the path is null
-     * @throws IllegalArgumentException if the path is malformed
-     * @throws IllegalStateException    if the element at the path is not a number
+     * @param path The path to get the double at.
+     * @return The double value at this path. If the value at the path does not exist
+     * then null is returned.
+     * @throws IllegalArgumentException if the path is malformed.
+     * @throws IllegalStateException    if the element at the path is not a number.
      * @see JSONConfig.getElement
      * @since 2.2
      */
@@ -497,12 +496,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a long at the specified path
      *
-     * @param path The path to get the long at *Must not be null*
-     * @return An optional containing the long value. If the value at the path does not exist
-     * then the optional is empty
-     * @throws NullPointerException     if the path is null
-     * @throws IllegalArgumentException if the path is malformed
-     * @throws IllegalStateException    if the element at the path is not a number
+     * @param path The path to get the long at.
+     * @return The long value at this path. If the value at the path does not exist
+     * then null is returned.
+     * @throws IllegalArgumentException if the path is malformed.
+     * @throws IllegalStateException    if the element at the path is not a number.
      * @see JSONConfig.getElement
      * @since 2.2
      */
@@ -521,12 +519,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a boolean at the specified path
      *
-     * @param path The path to get the boolean at *Must not be null*
-     * @return An optional containing the double value. If the value at the path does not exist
-     * then the optional is empty
-     * @throws NullPointerException     if the path is null
-     * @throws IllegalArgumentException if the path is malformed
-     * @throws IllegalStateException    if the element at the path is not a boolean
+     * @param path The path to get the boolean at.
+     * @return The boolean value at this path. If the value at the path does not exist
+     * then null is returned.
+     * @throws IllegalArgumentException if the path is malformed.
+     * @throws IllegalStateException    if the element at the path is not a boolean.
      * @see JSONConfig.getElement
      * @since 2.2
      */
@@ -545,10 +542,9 @@ open class JSONConfig private constructor(val mode: MediaType) {
     /**
      * Gets a JSON array at the specified path
      *
-     * @param path The path to get the array at *Must not be null*
-     * @return An optional containing the array. If the value at the path doesn't exist
-     * than the optional is empty
-     * @throws NullPointerException     if the path is null
+     * @param path The path to get the array at.
+     * @return The array at this path. If the value at the path doesn't exist
+     * then null is returned.
      * @throws IllegalArgumentException if the path is malformed
      * @throws IllegalStateException    if the element at the path is not an array
      * @see JSONConfig.getElement
@@ -642,7 +638,6 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * Reloads the config.
      *
      * @throws UnsupportedOperationException If trying to reload from JsonObject
-     * @throws IllegalStateException         If somehow the mode is invalid
      * @throws FileNotFoundException         If the config file was moved/removed
      */
     @Throws(FileNotFoundException::class)

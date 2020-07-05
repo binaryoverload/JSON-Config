@@ -1,0 +1,49 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>verifyPath - jsonconfig</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="index.html">com.github.binaryoverload</a>&nbsp;/&nbsp;<a href="./verify-path.html">verifyPath</a><br/>
+<br/>
+<h1>verifyPath</h1>
+<a name="com.github.binaryoverload$verifyPath(kotlin.String, java.util.regex.Pattern)"></a>
+<code><span class="keyword">fun </span><span class="identifier">verifyPath</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, java.util.regex.Pattern)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, java.util.regex.Pattern)/pattern">pattern</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html"><span class="identifier">Pattern</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Verifies a path with a specific path separator</p>
+<h3>Parameters</h3>
+<p><a name="path"></a>
+<code>path</code> - The path to verify</p>
+<p><a name="pattern"></a>
+<code>pattern</code> - The regex pattern which is used to check if the path matches.</p>
+<h3>Exceptions</h3>
+<p><a name="NullPointerException"></a>
+<code>NullPointerException</code> - if either of the variables are null</p>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path separator is empty or any length other than 1</p>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path supplied is malformed</p>
+<p><strong>Since</strong><br/>
+2.1</p>
+<a name="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))"></a>
+<code><span class="keyword">fun </span><span class="identifier">verifyPath</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/ps">ps</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/allowedSpecialChars">allowedSpecialChars</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Verifies a path with a specific path separator</p>
+<h3>Parameters</h3>
+<p><a name="path"></a>
+<code>path</code> - The path to verify.</p>
+<p><a name="ps"></a>
+<code>ps</code> - The path separator to use for verification.</p>
+<p><a name="allowedSpecialChars"></a>
+<code>allowedSpecialChars</code> - The allowed special characters which can be used on the path. This cannot conflict
+with the path separator.</p>
+<h3>Exceptions</h3>
+<p><a name="NullPointerException"></a>
+<code>NullPointerException</code> - if either of the variables are null</p>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path separator is empty or any length other than 1</p>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path supplied is malformed</p>
+<p><strong>Since</strong><br/>
+2.1</p>
+</BODY>
+</HTML>
