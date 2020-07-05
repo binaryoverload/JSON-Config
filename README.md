@@ -1,6 +1,6 @@
 ## JSON-Config 
 
-[![Build Status](https://travis-ci.org/binaryoverload/JSON-Config.svg?branch=master)](https://travis-ci.org/binaryoverload/JSON-Config)  [![JitPack Version](https://jitpack.io/v/BinaryOverload/JSON-Config.svg)](https://jitpack.io/#BinaryOverload/JSON-Config)
+[![Build Status](https://travis-ci.org/binaryoverload/JSON-Config.svg?branch=master)](https://travis-ci.org/binaryoverload/JSON-Config)  [![JitPack Version](https://jitpack.io/v/BinaryOverload/JSON-Config.svg)](https://jitpack.io/#BinaryOverload/JSON-Config) [![documenation](https://img.shields.io/badge/documentation-available-brightgreen.svg)](https://binaryoverload.github.io/JSON-Config/jsonconfig/)
 
 ## Add as a dependency
 Maven:
