@@ -1,0 +1,26 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>generatePathPattern - jsonconfig</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="index.html">com.github.binaryoverload</a>&nbsp;/&nbsp;<a href="./generate-path-pattern.html">generatePathPattern</a><br/>
+<br/>
+<h1>generatePathPattern</h1>
+<a name="com.github.binaryoverload$generatePathPattern(kotlin.Char, kotlin.collections.Set((kotlin.Char)))"></a>
+<code><span class="keyword">fun </span><span class="identifier">generatePathPattern</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$generatePathPattern(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/pathSeparator">pathSeparator</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$generatePathPattern(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/allowedSpecialCharacters">allowedSpecialCharacters</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html"><span class="identifier">Pattern</span></a></code>
+<p>Generate a Pattern (compiled) from pathSeparator char and allowedSpecialCharacters char array.
+You should only run this when it is needed and store the return. You should NOT run this multiple times!</p>
+<h3>Parameters</h3>
+<p><a name="pathSeparator"></a>
+<code>pathSeparator</code> - The path separator char to include in the regex.</p>
+<p><a name="allowedSpecialCharacters"></a>
+<code>allowedSpecialCharacters</code> - The allowed special characters which will be escaped. Keep in mind
+this will not verify a conflict. See <a href="#">.verifyNoConflict</a>
+for that.</p>
+<p><strong>Return</strong><br/>
+The compiled Pattern used for checking a valid path with the specified pathSeperator and
+allowedSpecialCharacters.</p>
+</BODY>
+</HTML>

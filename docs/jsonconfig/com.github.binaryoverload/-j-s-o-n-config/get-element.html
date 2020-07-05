@@ -1,0 +1,45 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>JSONConfig.getElement - jsonconfig</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="../index.html">com.github.binaryoverload</a>&nbsp;/&nbsp;<a href="index.html">JSONConfig</a>&nbsp;/&nbsp;<a href="./get-element.html">getElement</a><br/>
+<br/>
+<h1>getElement</h1>
+<a name="com.github.binaryoverload.JSONConfig$getElement(com.google.gson.JsonObject, kotlin.String)"></a>
+<code><span class="keyword">fun </span><span class="identifier">getElement</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload.JSONConfig$getElement(com.google.gson.JsonObject, kotlin.String)/json">json</span><span class="symbol">:</span>&nbsp;<span class="identifier">JsonObject</span><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload.JSONConfig$getElement(com.google.gson.JsonObject, kotlin.String)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">JsonElement</span><span class="symbol">?</span></code>
+<p>Method to get a JSON Element from a specified path</p>
+<p><strong>It is not recommended to use this method! Use<a href="#">com.github.binaryoverload.JSONConfig.getElement</a> instead!</strong></p>
+<h3>Parameters</h3>
+<p><a name="json"></a>
+<code>json</code> - The object to search in</p>
+<p><a name="path"></a>
+<code>path</code> - The path to get the element from. If this is blank,
+it returns the entire object. If the path is malformed,
+then it throws an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></p>
+<h3>Exceptions</h3>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path is malformed</p>
+<p><strong>Return</strong><br/>
+The element at the specified path. Returns null if the element doesn't exist.</p>
+<p><strong>Since</strong><br/>
+2.0</p>
+<a name="com.github.binaryoverload.JSONConfig$getElement(kotlin.String)"></a>
+<code><span class="keyword">fun </span><span class="identifier">getElement</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload.JSONConfig$getElement(kotlin.String)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">JsonElement</span><span class="symbol">?</span></code>
+<p>The recommended method to get an element from the config</p>
+<h3>Parameters</h3>
+<p><a name="path"></a>
+<code>path</code> - The path to get the element from. If this is blank,
+it returns the entire object. If the path is malformed,
+then it throws an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-argument-exception/index.html">IllegalArgumentException</a></p>
+<h3>Exceptions</h3>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path is malformed</p>
+<p><strong>Return</strong><br/>
+The element at the specified path. Returns null if the element doesn't exist.</p>
+<p><strong>Since</strong><br/>
+2.0</p>
+</BODY>
+</HTML>
