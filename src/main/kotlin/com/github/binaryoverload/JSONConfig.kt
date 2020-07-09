@@ -634,6 +634,23 @@ open class JSONConfig private constructor(val mode: MediaType) {
 
     override fun toString(): String = configLock.read { _internalObject.toString() }
 
+    operator fun plus(other: JSONConfig): JSONConfig {
+        return JSONConfig().apply {
+            other._internalObject.entrySet().forEach { this[it.key] = it.value }
+            this._internalObject.entrySet().forEach { this[it.key] = it.value }
+        }
+    }
+
+    operator fun contains(key: String): Boolean = containsKey(key)
+
+    fun containsKey(key: String): Boolean {
+        return _internalObject.has(key)
+    }
+
+    fun containsValue(element: JsonElement): Boolean {
+        return _internalObject.entrySet().find { it.value == element } != null
+    }
+
     /**
      * Reloads the config.
      *
