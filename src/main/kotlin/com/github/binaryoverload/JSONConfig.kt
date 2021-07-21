@@ -433,11 +433,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @since 3.0
      */
     @JvmOverloads
-    fun getString(path: String, forceConversion: Boolean = false): String? {
+    fun getString(path: String, default: String? = null, forceConversion: Boolean = false): String? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
-            null
+            default
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isString) {
             element.asString
         } else if (forceConversion) {
@@ -458,11 +458,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @see JSONConfig.getElement
      * @since 2.1
      */
-    fun getInteger(path: String): Int? {
+    fun getInteger(path: String, default: Int? = null): Int? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
-            null
+            default
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isNumber) {
             element.asNumber.toInt()
         } else {
@@ -481,11 +481,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @see JSONConfig.getElement
      * @since 2.2
      */
-    fun getDouble(path: String): Double? {
+    fun getDouble(path: String, default: Double? = null): Double? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
-            null
+            default
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isNumber) {
             element.asNumber.toDouble()
         } else {
@@ -504,11 +504,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @see JSONConfig.getElement
      * @since 2.2
      */
-    fun getLong(path: String): Long? {
+    fun getLong(path: String, default: Long? = null): Long? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
-            null
+            default
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isNumber) {
             element.asNumber.toLong()
         } else {
@@ -527,11 +527,11 @@ open class JSONConfig private constructor(val mode: MediaType) {
      * @see JSONConfig.getElement
      * @since 2.2
      */
-    fun getBoolean(path: String): Boolean? {
+    fun getBoolean(path: String, default: Boolean? = null): Boolean? {
         verifyPath(path, pathPattern)
         val element = getElement(path)
         return if (element == null) {
-            null
+            default
         } else if (element.isJsonPrimitive && element.asJsonPrimitive.isBoolean) {
             element.asBoolean
         } else {
