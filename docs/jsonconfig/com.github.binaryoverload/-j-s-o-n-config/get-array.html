@@ -1,0 +1,31 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>JSONConfig.getArray - jsonconfig</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="../index.html">com.github.binaryoverload</a>&nbsp;/&nbsp;<a href="index.html">JSONConfig</a>&nbsp;/&nbsp;<a href="./get-array.html">getArray</a><br/>
+<br/>
+<h1>getArray</h1>
+<a name="com.github.binaryoverload.JSONConfig$getArray(kotlin.String)"></a>
+<code><span class="keyword">fun </span><span class="identifier">getArray</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload.JSONConfig$getArray(kotlin.String)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><span class="identifier">JsonArray</span><span class="symbol">?</span></code>
+<p>Gets a JSON array at the specified path</p>
+<h3>Parameters</h3>
+<p><a name="path"></a>
+<code>path</code> - The path to get the array at.</p>
+<h3>Exceptions</h3>
+<p><a name="IllegalArgumentException"></a>
+<code>IllegalArgumentException</code> - if the path is malformed</p>
+<p><a name="IllegalStateException"></a>
+<code>IllegalStateException</code> - if the element at the path is not an array</p>
+<p><strong>Return</strong><br/>
+The array at this path. If the value at the path doesn't exist
+then null is returned.</p>
+<p><strong>See Also</strong><br/>
+<p><a href="#">JSONConfig.getElement</a></p>
+</p>
+<p><strong>Since</strong><br/>
+2.5</p>
+</BODY>
+</HTML>

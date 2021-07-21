@@ -1,0 +1,26 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>JSONConfig.getSubConfig - jsonconfig</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="../index.html">com.github.binaryoverload</a>&nbsp;/&nbsp;<a href="index.html">JSONConfig</a>&nbsp;/&nbsp;<a href="./get-sub-config.html">getSubConfig</a><br/>
+<br/>
+<h1>getSubConfig</h1>
+<a name="com.github.binaryoverload.JSONConfig$getSubConfig(kotlin.String)"></a>
+<code><span class="keyword">fun </span><span class="identifier">getSubConfig</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload.JSONConfig$getSubConfig(kotlin.String)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">JSONConfig</span></a><span class="symbol">?</span></code>
+<p>Returns a new config with its root object set to the object
+retrieved from the specified path</p>
+<h3>Parameters</h3>
+<p><a name="path"></a>
+<code>path</code> - The path to get the new config from <em>Cannot be null</em></p>
+<h3>Exceptions</h3>
+<p><a name="IllegalStateException"></a>
+<code>IllegalStateException</code> - if the element at the path is not a JSON object.</p>
+<p><strong>Return</strong><br/>
+The JSONConfig at the path. Returns null if there is not an element at the specified path.</p>
+<p><strong>Since</strong><br/>
+2.3</p>
+</BODY>
+</HTML>

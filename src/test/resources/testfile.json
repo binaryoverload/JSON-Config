@@ -1,0 +1,9 @@
+{
+  "title": "Product set",
+  "type": "array",
+  "date": 10247893,
+  "items": {
+    "title": "Product",
+    "type": "object"
+  }
+}

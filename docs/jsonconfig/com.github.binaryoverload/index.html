@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>com.github.binaryoverload - jsonconfig</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">jsonconfig</a>&nbsp;/&nbsp;<a href="./index.html">com.github.binaryoverload</a><br/>
+<br/>
+<h2>Package com.github.binaryoverload</h2>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-j-s-o-n-config/index.html">JSONConfig</a></h4>
+</td>
+<td>
+<p>Main config class used to represent a json file
+accessible by "paths"</p>
+<code><span class="keyword">open</span> <span class="keyword">class </span><span class="identifier">JSONConfig</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-media-type/index.html">MediaType</a></h4>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">MediaType</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="check-string-length.html">checkStringLength</a></h4>
+</td>
+<td>
+<p>Helper method to check string length
+<em>Checks if the string is empty by default</em></p>
+<code><span class="keyword">fun </span><span class="identifier">checkStringLength</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$checkStringLength(kotlin.String, kotlin.Int)/string">string</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$checkStringLength(kotlin.String, kotlin.Int)/length">length</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Helper method to check string length</p>
+<code><span class="keyword">fun </span><span class="identifier">checkStringLength</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$checkStringLength(kotlin.String, kotlin.Int, kotlin.Boolean)/string">string</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$checkStringLength(kotlin.String, kotlin.Int, kotlin.Boolean)/length">length</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$checkStringLength(kotlin.String, kotlin.Int, kotlin.Boolean)/emptyCheck">emptyCheck</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="escape-regex.html">escapeRegex</a></h4>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">escapeRegex</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$escapeRegex(kotlin.String)/s">s</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="generate-path-pattern.html">generatePathPattern</a></h4>
+</td>
+<td>
+<p>Generate a Pattern (compiled) from pathSeparator char and allowedSpecialCharacters char array.
+You should only run this when it is needed and store the return. You should NOT run this multiple times!</p>
+<code><span class="keyword">fun </span><span class="identifier">generatePathPattern</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$generatePathPattern(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/pathSeparator">pathSeparator</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$generatePathPattern(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/allowedSpecialCharacters">allowedSpecialCharacters</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html"><span class="identifier">Pattern</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="verify-no-conflict.html">verifyNoConflict</a></h4>
+</td>
+<td>
+<p>Verify that the char array (in this case special character array) does not contain char
+(in this case path separator).</p>
+<code><span class="keyword">fun </span><span class="identifier">verifyNoConflict</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$verifyNoConflict(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/c">c</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyNoConflict(kotlin.Char, kotlin.collections.Set((kotlin.Char)))/cList">cList</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="verify-path.html">verifyPath</a></h4>
+</td>
+<td>
+<p>Verifies a path with a specific path separator</p>
+<code><span class="keyword">fun </span><span class="identifier">verifyPath</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, java.util.regex.Pattern)/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, java.util.regex.Pattern)/pattern">pattern</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html"><span class="identifier">Pattern</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">verifyPath</span><span class="symbol">(</span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/path">path</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/ps">ps</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="com.github.binaryoverload$verifyPath(kotlin.String, kotlin.Char, kotlin.collections.Set((kotlin.Char)))/allowedSpecialChars">allowedSpecialChars</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>
